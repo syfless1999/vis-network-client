@@ -1,6 +1,6 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Vis-network Client Example
+A completing large scale visual network project's web client use React. D3.js, TypeScript.
+Nice to contribute to it.
 
 ## Available Scripts
 
