@@ -1,14 +1,18 @@
 import React from 'react';
 import { Switch, Route, Link } from 'react-router-dom';
-import Container from '@material-ui/core/Container';
-import { Grid } from '@material-ui/core';
 import styled from 'styled-components';
+
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+
 import 'fontsource-roboto-condensed/700.css';
 
 import routers from 'src/config/router';
 
-const MyContainer = styled(Container)`
-  margin-top: 30px;
+const SPaper = styled(Paper)`
+  margin: 16px auto;
+  padding: 10px;
 `;
 const MenuGrid = styled(Grid)`
   padding: 65px 0 15px;
@@ -18,18 +22,29 @@ const MenuItem = styled.div`
   height: 40px;
   padding: 3px 0;
   border-bottom: 2px solid ${(props) => props.theme[props.color as string]};
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.5em;
+  font-family: 'Roboto Condensed';
   cursor: pointer;
-  font-family: "Roboto Condensed";
 
   & a {
     text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    color: -webkit-link;
   }
 
   :hover {
     border-bottom-width: 5px;
   }
+`;
+const TitleGrid = styled(Grid)`
+  text-align: justify;
+  font-size: 4em;
+  font-weight: 600;
+  font-family: "Roboto Condensed";
+`;
+const SLink = styled(Link)`
 `;
 
 function App() {
@@ -37,16 +52,16 @@ function App() {
     const { color, text, to } = props;
     return (
       <MenuItem color={color}>
-        <Link to={to}>{text}</Link>
+        <SLink to={to}>{text}</SLink>
       </MenuItem>
     );
   };
   const Header = () => (
-    <Grid container>
+    <Grid container wrap="wrap-reverse" justify="space-around" spacing={2}>
       <Grid item xs={7}>
-        <MenuGrid container justify="space-around" wrap="wrap">
+        <MenuGrid container justify="space-between">
           <Grid item xs={2}>
-            <MItem color="red" text="home" to="/" />
+            <MItem color="red" text="Home" to="/" />
           </Grid>
           {routers.map((item, index) => {
             const color = index % 2 === 1 ? 'red' : 'blue';
@@ -62,12 +77,11 @@ function App() {
           })}
         </MenuGrid>
       </Grid>
-      <Grid item xs={5}>Hello Visualization</Grid>
+      <TitleGrid item xs>Visualization Network</TitleGrid>
     </Grid>
   );
-  return (
-    <MyContainer maxWidth="lg">
-      <Header />
+  const Content = () => (
+    <SPaper variant="outlined">
       <Switch>
         {routers.map((item) => (
           <Route key={item.key} path={item.url}>
@@ -78,7 +92,13 @@ function App() {
           <h1>home</h1>
         </Route>
       </Switch>
-    </MyContainer>
+    </SPaper>
+  );
+  return (
+    <Container maxWidth="lg">
+      <Header />
+      <Content />
+    </Container>
   );
 }
 

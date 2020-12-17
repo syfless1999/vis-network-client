@@ -5654,11 +5654,6 @@ fontsource-roboto-condensed@^3.1.5:
   resolved "https://registry.npm.taobao.org/fontsource-roboto-condensed/download/fontsource-roboto-condensed-3.1.5.tgz#665f424d3589830f89114385dfb2b605c5f62fa4"
   integrity sha1-Zl9CTTWJgw+JEUOF37K2BcX2L6Q=
 
-fontsource-roboto@^3.1.5:
-  version "3.1.5"
-  resolved "https://registry.npm.taobao.org/fontsource-roboto/download/fontsource-roboto-3.1.5.tgz#d5da8bac968db7911e20fd2fb6c227d405f86cba"
-  integrity sha1-1dqLrJaNt5EeIP0vtsIn1AX4bLo=
-
 for-in@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npm.taobao.org/for-in/download/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"

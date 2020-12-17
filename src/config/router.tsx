@@ -1,5 +1,9 @@
 import React from 'react';
 
+import Dataset from 'src/page/dataset';
+import Task from 'src/page/task';
+import Network from 'src/page/network';
+
 export interface Router {
   key: string;
   text: string;
@@ -12,19 +16,19 @@ const routers: Array<Router> = [
     key: 'dataset',
     text: 'Dataset',
     url: '/dataset',
-    component: (<h1>dataset</h1>),
+    component: <Dataset />,
   },
   {
     key: 'task',
     text: 'Task',
     url: '/task',
-    component: (<h1>task</h1>),
+    component: <Task />,
   },
   {
     key: 'network',
     text: 'Network',
     url: '/network',
-    component: (<h1>network</h1>),
+    component: <Network />,
   },
 ];
 
