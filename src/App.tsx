@@ -1,40 +1,50 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import styled from 'styled-components';
-
-import Container from '@material-ui/core/Container';
-import Paper from '@material-ui/core/Paper';
-
-import 'fontsource-roboto-condensed/700.css';
+import { Layout } from 'antd';
 
 import routers from 'src/config/router';
 import Header from 'src/page/common/Header';
+import Footer from 'src/page/common/Footer';
 
-const SPaper = styled(Paper)`
+import 'src/app.css';
+
+const { Content } = Layout;
+
+const MyContent = styled(Content)`
+  padding: 0 50px;
+  margin-top: 64px;
+`;
+const Container = styled.div`
   margin: 16px auto;
-  padding: 10px;
+  padding: 24px;
+  min-height:380px;
+  background-color: ${(props) => props.theme['panel-background']};
 `;
 
 function App() {
-  const Content = () => (
-    <SPaper variant="outlined">
-      <Switch>
-        {routers.map((item) => (
-          <Route key={item.key} path={item.url}>
-            {item.component}
-          </Route>
-        ))}
-        <Route path="/">
-          <h1>home</h1>
+  const Router = () => (
+    <Switch>
+      {routers.map((item) => (
+        <Route key={item.key} path={item.url}>
+          {item.component}
         </Route>
-      </Switch>
-    </SPaper>
+      ))}
+      <Route path="/">
+        <h1>home</h1>
+      </Route>
+    </Switch>
   );
   return (
-    <Container maxWidth="lg">
+    <Layout>
       <Header />
-      <Content />
-    </Container>
+      <MyContent>
+        <Container>
+          <Router />
+        </Container>
+      </MyContent>
+      <Footer />
+    </Layout>
   );
 }
 
