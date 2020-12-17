@@ -9,7 +9,6 @@ const MyHeader = styled(Header)`
   position: fixed;
   box-sizing: border-box;
   width: 100%;
-  background-color: ${(props) => props.theme['panel-background']};
   z-index: 1;
 `;
 

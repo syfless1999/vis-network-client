@@ -7,7 +7,7 @@ import routers from 'src/config/router';
 import Header from 'src/page/common/Header';
 import Footer from 'src/page/common/Footer';
 
-import 'src/app.css';
+import 'src/app.less';
 
 const { Content } = Layout;
 
@@ -19,8 +19,7 @@ const Container = styled.div`
   margin: 16px auto;
   padding: 24px;
   min-height:380px;
-  background-color: ${(props) => props.theme['panel-background']};
-`;
+  background-color: ${(props) => props.theme['panel-background']};`;
 
 function App() {
   const Router = () => (

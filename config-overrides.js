@@ -1,21 +1,30 @@
 const path = require('path');
 const { readFileSync } = require('fs');
+const { override, addWebpackAlias, addLessLoader } = require('customize-cra');
 
-module.exports = function override(config) {
+const theme = require("./src/config/antd-theme.json");
+const webpackAliasConfig = parseAliasPath();
+
+module.exports = override(
+  addWebpackAlias(webpackAliasConfig),
+  addLessLoader({
+    lessOptions: {
+      javascriptEnabled: true,
+      modifyVars: theme,
+    },
+  }),
+);
+
+
+function parseAliasPath() {
   const json = JSON.parse(readFileSync(path.resolve(__dirname, './tsconfig.paths.json')));
   const paths = json.compilerOptions.paths;
 
-  config.resolve = {
-    ...config.resolve,
-    alias: {
-      ...config.alias,
-    },
-  };
   for (const key in paths) {
     if (Object.hasOwnProperty.call(paths, key)) {
       const pathArr = paths[key];
-      config.resolve.alias[key] = path.resolve(__dirname, pathArr[0]);
+      paths[key] = path.resolve(__dirname, pathArr[0]);
     }
   }
-  return config;
-};
+  return paths;
+}

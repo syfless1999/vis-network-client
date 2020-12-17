@@ -5,12 +5,12 @@ import styled from 'styled-components';
 const { Footer } = Layout;
 
 const MyFooter = styled(Footer)`
-  background-color: ${(props) => props.theme['panel-background']};
+  text-align:center;
 `;
 
 function index() {
   return (
-    <MyFooter style={{ textAlign: 'center' }}>
+    <MyFooter>
       the garden of sinners@syfless
     </MyFooter>
   );

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
-import theme from 'src/config/theme';
+import theme from 'src/config/sc-theme';
 import App from 'src/app';
 import reportWebVitals from './reportWebVitals';
 
