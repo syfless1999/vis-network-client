@@ -18,6 +18,7 @@ export interface ExpandSource {
 
 export interface DataSource {
   id: number;
+  key?: number;
   name: string;
   url: string;
   scale?: DataScale;
@@ -29,6 +30,7 @@ export interface DataSource {
 const mockDataSourceList = (): Array<DataSource> => {
   const createDataSource = (id: number): DataSource => ({
     id,
+    key: id,
     name: 'students',
     url: 'http://students.fetch',
     scale: DataScale.THOUSAND,
@@ -61,10 +63,10 @@ const useDataSource = () => {
     };
   }, []);
 
-  return {
-    dataSourceList: list,
-    setDataSourceList: setList,
-  };
+  return [
+    list,
+    setList,
+  ];
 };
 
 export default useDataSource;
