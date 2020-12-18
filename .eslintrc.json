@@ -53,7 +53,8 @@
           "some": ["nesting", "id"]
         }
       }
-    ]
+    ],
+    "no-shadow": "off"
   },
   "settings": {
     "import/resolver": {

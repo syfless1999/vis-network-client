@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Dataset from 'src/page/dataset';
+import DataSource from 'src/page/datasource';
 import Task from 'src/page/task';
 import Network from 'src/page/network';
 
@@ -13,10 +13,10 @@ export interface Router {
 
 const routers: Array<Router> = [
   {
-    key: 'dataset',
-    text: 'Dataset',
-    url: '/dataset',
-    component: <Dataset />,
+    key: 'datasource',
+    text: 'DataSource',
+    url: '/datasource',
+    component: <DataSource />,
   },
   {
     key: 'task',
