@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import { Layout } from 'antd';
 
 import routers from 'src/config/router';
-import Header from 'src/page/common/Header';
-import Footer from 'src/page/common/Footer';
+import Header from 'src/page/layout/Header';
+import Footer from 'src/page/layout/Footer';
 
 import 'src/app.less';
 
