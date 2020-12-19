@@ -1,6 +1,6 @@
 const path = require('path');
 const { readFileSync } = require('fs');
-const { override, fixBabelImports, addWebpackAlias, addLessLoader } = require('customize-cra');
+const { override, addWebpackAlias, addLessLoader } = require('customize-cra');
 
 const theme = require("./src/config/antd-theme.json");
 const webpackAliasConfig = parseAliasPath();
@@ -14,12 +14,6 @@ module.exports = override(
       javascriptEnabled: true,
       modifyVars: theme,
     },
-  }),
-  // antd demand loading
-  fixBabelImports('import', {
-    libraryName: 'antd',
-    libraryDirectory: 'es',
-    style: 'css',
   }),
 );
 
