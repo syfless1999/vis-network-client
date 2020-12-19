@@ -1,57 +1,26 @@
-import React, { useMemo } from 'react';
-import { Table, Tag } from 'antd';
-import useDataSourceList, { DataParam, DataSource } from 'src/model/datasource';
-import { getRandomColor } from 'src/util/color';
-
-const columns = [
-  {
-    title: 'name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'scale',
-    dataIndex: 'scale',
-    key: 'scale',
-  },
-  {
-    title: 'node params',
-    dataIndex: 'param',
-    key: 'nodeParams',
-    render: (params: DataParam) => (
-      <>
-        {params.node && params.node.map(
-          (p) => (
-            <Tag key={p} color={getRandomColor()}>{p}</Tag>
-          ),
-        )}
-      </>
-    ),
-  },
-  {
-    title: 'edge params',
-    dataIndex: 'param',
-    key: 'edgeParams',
-    render: (params: DataParam) => (
-      <>
-        {params.edge && params.edge.map(
-          (p) => (
-            <Tag key={p} color={getRandomColor()}>{p}</Tag>
-          ),
-        )}
-      </>
-    ),
-  },
-];
+import React, { useCallback, useState } from 'react';
+import useDataSourceList, { DataSource } from 'src/model/datasource';
+import SearchAndAddBar from 'src/page/component/SearchAndAddBar';
+import AddDataSourceDrawer from './AddDataSourceDrawer';
+import DataSourceList from './DataSourceList';
 
 const DataSourcePanel = () => {
   const [list] = useDataSourceList();
-  Array.from({ length: 20 }).forEach(() => {
-    console.log(getRandomColor());
-  });
+  const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
+  const changeDrawerVisible = useCallback(
+    () => setDrawerVisible(!drawerVisible),
+    [drawerVisible],
+  );
+
   return (
     <div>
-      <Table columns={columns} dataSource={list as Array<DataSource>} />
+      <SearchAndAddBar title="Data Source List" handleClick={changeDrawerVisible} />
+      <DataSourceList dataSource={list as Array<DataSource>} />
+      <AddDataSourceDrawer
+        visible={drawerVisible}
+        handleCancel={changeDrawerVisible}
+        handleSubmit={changeDrawerVisible}
+      />
     </div>
   );
 };

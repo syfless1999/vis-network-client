@@ -6,11 +6,15 @@ export enum DataScale {
   MILLION = 'million',
 }
 
-export interface DataParam {
-  node?: Array<string>;
-  edge?: Array<string>;
+export interface NodeFeature {
+  count: number;
+  param: Array<string>;
 }
 
+export interface EdgeFeature {
+  count: number;
+  param: Array<string>;
+}
 export interface ExpandSource {
   url: string;
   updateCycle: number;
@@ -18,11 +22,13 @@ export interface ExpandSource {
 
 export interface DataSource {
   id: number;
-  key?: number;
   name: string;
   url: string;
+  node: NodeFeature;
+  edge: EdgeFeature;
+  progress: number;
+  key?: number;
   scale?: DataScale;
-  param: DataParam;
   needExpand: boolean;
   expandSource?: ExpandSource;
 }
@@ -33,12 +39,17 @@ const mockDataSourceList = (): Array<DataSource> => {
     key: id,
     name: 'students',
     url: 'http://students.fetch',
-    scale: DataScale.THOUSAND,
-    param: {
-      node: ['age', 'birth', 'sex'],
-      edge: ['duration'],
+    node: {
+      count: Math.floor(Math.random() * 10000),
+      param: ['age', 'birth', 'sex'],
     },
-    needExpand: true,
+    edge: {
+      count: Math.floor(Math.random() * 1000000),
+      param: ['duration'],
+    },
+    progress: Math.floor(Math.random() * 100),
+    scale: DataScale.THOUSAND,
+    needExpand: Math.random() > 0.5,
     expandSource: {
       url: 'http://students.add',
       updateCycle: 30,

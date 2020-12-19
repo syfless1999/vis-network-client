@@ -7,8 +7,6 @@ import routers from 'src/config/router';
 import Header from 'src/page/layout/Header';
 import Footer from 'src/page/layout/Footer';
 
-import 'src/app.less';
-
 const { Content } = Layout;
 
 const MyContent = styled(Content)`
