@@ -53,9 +53,7 @@ const useDataSource = () => {
   useEffect(() => {
     Promise.resolve()
       .then(() => {
-        setTimeout(() => {
-          setList(mockDataSourceList());
-        }, 500);
+        setList(mockDataSourceList());
       });
 
     return () => {

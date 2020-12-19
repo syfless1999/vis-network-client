@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Table, Tag } from 'antd';
 import useDataSourceList, { DataParam, DataSource } from 'src/model/datasource';
+import { getRandomColor } from 'src/util/color';
 
 const columns = [
   {
@@ -19,7 +20,11 @@ const columns = [
     key: 'nodeParams',
     render: (params: DataParam) => (
       <>
-        {params.node && params.node.map((p) => <Tag key={p}>{p}</Tag>)}
+        {params.node && params.node.map(
+          (p) => (
+            <Tag key={p} color={getRandomColor()}>{p}</Tag>
+          ),
+        )}
       </>
     ),
   },
@@ -29,7 +34,11 @@ const columns = [
     key: 'edgeParams',
     render: (params: DataParam) => (
       <>
-        {params.edge && params.edge.map((p) => <Tag key={p}>{p}</Tag>)}
+        {params.edge && params.edge.map(
+          (p) => (
+            <Tag key={p} color={getRandomColor()}>{p}</Tag>
+          ),
+        )}
       </>
     ),
   },
@@ -37,6 +46,9 @@ const columns = [
 
 const DataSourcePanel = () => {
   const [list] = useDataSourceList();
+  Array.from({ length: 20 }).forEach(() => {
+    console.log(getRandomColor());
+  });
   return (
     <div>
       <Table columns={columns} dataSource={list as Array<DataSource>} />
