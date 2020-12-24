@@ -19,7 +19,8 @@ const Container = styled.div`
   margin: 16px auto;
   padding: 24px;
   min-height:380px;
-  background-color: ${(props) => props.theme['@panel-background']};`;
+  background-color: ${(props) => props.theme['@panel-background']};
+`;
 
 function App() {
   const Router = () => (
