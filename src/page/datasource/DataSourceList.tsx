@@ -73,7 +73,7 @@ const columns = [
 function DataSourceList(props: { dataSource: Array<DataSource> }) {
   const { dataSource } = props;
   return (
-    <Table columns={columns} dataSource={dataSource} />
+    <Table rowKey="id" columns={columns} dataSource={dataSource} />
   );
 }
 

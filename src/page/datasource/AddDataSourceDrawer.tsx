@@ -1,18 +1,25 @@
 import {
   Drawer, Form, Button, Col, Row, Input, Select, Switch, InputNumber,
 } from 'antd';
-import React, { useState } from 'react';
+import { FormInstance } from 'antd/lib/form';
+import React, { useRef, useState } from 'react';
 import { DataScale } from 'src/model/datasource';
 
 const { Option } = Select;
 
 const AddDataSourceDrawer = (props: {
   visible: boolean,
-  handleSubmit: () => void,
+  handleSubmit: (values: any) => void,
   handleCancel: () => void,
 }) => {
   const { visible, handleSubmit, handleCancel } = props;
   const [needExpand, setNeedExpand] = useState(false);
+  const formInstance = useRef<FormInstance>(null);
+  const handleButtonClick = () => {
+    if (formInstance.current) {
+      formInstance.current.submit();
+    }
+  };
   return (
     <Drawer
       title="Add a new data source"
@@ -29,13 +36,13 @@ const AddDataSourceDrawer = (props: {
           <Button onClick={handleCancel} style={{ marginRight: 8 }}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} type="primary">
+          <Button onClick={handleButtonClick} type="primary">
             Submit
           </Button>
         </div>
       )}
     >
-      <Form layout="vertical" hideRequiredMark>
+      <Form layout="vertical" ref={formInstance} onFinish={handleSubmit}>
         <Row gutter={16}>
           {/* name */}
           <Col span={12}>
@@ -54,12 +61,7 @@ const AddDataSourceDrawer = (props: {
               label="Url"
               rules={[{ required: true, message: 'Please enter the api url' }]}
             >
-              <Input
-                style={{ width: '100%' }}
-                addonBefore="https://"
-                addonAfter=".com"
-                placeholder="api url"
-              />
+              <Input placeholder="api url" />
             </Form.Item>
           </Col>
         </Row>
@@ -115,28 +117,24 @@ const AddDataSourceDrawer = (props: {
               {/* expand url */}
               <Col span={12}>
                 <Form.Item
-                  name="expand source url"
+                  name="expandSourceUrl"
                   label="expandSourceUrl"
                   rules={[{ required: true, message: 'Please enter the api url' }]}
                 >
-                  <Input
-                    style={{ width: '100%' }}
-                    addonBefore="https://"
-                    addonAfter=".com"
-                    placeholder="api url"
-                  />
+                  <Input placeholder="api url" />
                 </Form.Item>
               </Col>
               {/* updateCycle */}
               <Col span={12}>
-                <Form.Item
-                  name="updateCycle"
-                  label="update cycle"
-                  rules={[{ required: true, message: 'Please choose how often to update' }]}
-                >
-                  <InputNumber min={30} step={30} />
-                  {' '}
-                  minutes
+                <Form.Item label="update cycle">
+                  <Form.Item
+                    noStyle
+                    name="updateCycle"
+                    rules={[{ required: true, message: 'Please choose how often to update' }]}
+                  >
+                    <InputNumber min={30} step={30} />
+                  </Form.Item>
+                  <span>minutes</span>
                 </Form.Item>
               </Col>
             </Row>
