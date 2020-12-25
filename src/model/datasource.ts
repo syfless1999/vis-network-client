@@ -21,13 +21,12 @@ export interface ExpandSource {
 }
 
 export interface DataSource {
-  id: number;
+  id: string;
   name: string;
   url: string;
   node: NodeFeature;
   edge: EdgeFeature;
   progress: number;
-  key?: number;
   scale?: DataScale;
   needExpand: boolean;
   expandSource?: ExpandSource;
@@ -35,8 +34,7 @@ export interface DataSource {
 
 const mockDataSourceList = (): Array<DataSource> => {
   const createDataSource = (id: number): DataSource => ({
-    id,
-    key: id,
+    id: `${id}`,
     name: 'students',
     url: 'http://students.fetch',
     node: {
