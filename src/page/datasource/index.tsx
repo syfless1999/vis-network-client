@@ -1,16 +1,16 @@
 import React, { useCallback, useState } from 'react';
-import { io } from 'socket.io-client';
 import useDataSourceList, { DataSource } from 'src/model/datasource';
 import SearchAndAddBar from 'src/page/component/SearchAndAddBar';
 import { createDataSource, CreateDataSourceParams } from 'src/service/datasource';
+import useWebsocket from 'src/util/hook/useWebsocket';
 import AddDataSourceDrawer from './AddDataSourceDrawer';
 import DataSourceList from './DataSourceList';
 
 const DataSourcePanel = () => {
-  const socket = io('http://127.0.0.1:5000/');
+  const socket = useWebsocket('http://127.0.0.1:5000/');
   const handleClick = () => {
-    socket.emit('chat message', 'hello');
-    socket.on('chat message', (msg: string) => {
+    socket.current?.emit('chat message', 'hello');
+    socket.current?.on('chat message', (msg: string) => {
       console.log(msg);
     });
   };
@@ -31,8 +31,7 @@ const DataSourcePanel = () => {
       },
     };
     createDataSource(params as CreateDataSourceParams)
-      .then((data) => {
-        console.log(data);
+      .then(() => {
         changeDrawerVisible();
       });
   };
