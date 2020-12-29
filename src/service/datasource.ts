@@ -23,3 +23,7 @@ export function createDataSource(params: CreateDataSourceParams) {
     },
   });
 }
+
+export function getDataSourceList() {
+  return request('/datasource');
+}

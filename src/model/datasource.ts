@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import useWebsocket from 'src/util/hook/useWebsocket';
 
 export enum DataScale {
   HUNDRED = 'hundred',
@@ -7,12 +8,14 @@ export enum DataScale {
 }
 
 export interface NodeFeature {
-  count: number;
+  total: number;
+  current: number;
   param: Array<string>;
 }
 
 export interface EdgeFeature {
-  count: number;
+  total: number;
+  current: number;
   param: Array<string>;
 }
 export interface ExpandSource {
@@ -26,48 +29,26 @@ export interface DataSource {
   url: string;
   node: NodeFeature;
   edge: EdgeFeature;
-  progress: number;
+  progress?: number;
   scale?: DataScale;
   needExpand: boolean;
   expandSource?: ExpandSource;
 }
 
-const mockDataSourceList = (): Array<DataSource> => {
-  const createDataSource = (id: number): DataSource => ({
-    id: `${id}`,
-    name: 'students',
-    url: 'http://students.fetch',
-    node: {
-      count: Math.floor(Math.random() * 10000),
-      param: ['age', 'birth', 'sex'],
-    },
-    edge: {
-      count: Math.floor(Math.random() * 1000000),
-      param: ['duration'],
-    },
-    progress: Math.floor(Math.random() * 100),
-    scale: DataScale.THOUSAND,
-    needExpand: Math.random() > 0.5,
-    expandSource: {
-      url: 'http://students.add',
-      updateCycle: 30,
-    },
-  });
-  return Array.from({ length: 23 }).map((item, index) => createDataSource(index));
-};
-
 const useDataSource = () => {
+  const socket = useWebsocket('http://127.0.0.1:5000/datasource');
   const [list, setList] = useState<Array<DataSource>>([]);
 
   useEffect(() => {
-    Promise.resolve()
-      .then(() => {
-        setList(mockDataSourceList());
-      });
-
-    return () => {
-      setList([]);
-    };
+    socket.current?.on('list', ({ list }: { list: Array<DataSource> }) => {
+      for (let i = 0; i < list.length; i += 1) {
+        const ds = list[i];
+        const { total: nodeTotal, current: nodeCurrent } = ds.node;
+        const { total: edgeTotal, current: edgeCurrent } = ds.edge;
+        ds.progress = Math.ceil(((nodeCurrent + edgeCurrent - 2) / (nodeTotal + edgeTotal)) * 100);
+      }
+      setList(list);
+    });
   }, []);
 
   return [
