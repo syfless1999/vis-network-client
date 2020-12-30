@@ -3,7 +3,7 @@ import {
   Table, Tag, Badge, Progress, Switch,
 } from 'antd';
 import styled from 'styled-components';
-import { DataSource, EdgeFeature, NodeFeature } from 'src/model/datasource';
+import DataSource, { EdgeFeature, NodeFeature } from 'src/model/datasource';
 import { getRandomColor } from 'src/util/color';
 import { numberSimplify } from 'src/util/number';
 

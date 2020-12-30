@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import useDataSourceList, { DataSource } from 'src/model/datasource';
+import DataSource from 'src/model/datasource';
+import useDataSourceList from 'src/util/hook/useDataSourceList';
 import SearchAndAddBar from 'src/page/component/SearchAndAddBar';
 import { createDataSource, CreateDataSourceParams } from 'src/service/datasource';
 import AddDataSourceDrawer from './AddDataSourceDrawer';
