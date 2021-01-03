@@ -22,7 +22,7 @@ export interface ExpandSource {
 }
 
 export default interface DataSource {
-  id: string;
+  _id: string;
   name: string;
   url: string;
   node: NodeFeature;
