@@ -1,20 +1,54 @@
 import {
-  Drawer, Form, Button, Col, Row, Input, Select, Switch, InputNumber,
+  Drawer, Form, Button, Col, Row, Input, Select, Switch, InputNumber, Radio,
 } from 'antd';
 import { FormInstance } from 'antd/lib/form';
+import { RadioChangeEvent } from 'antd/lib/radio';
 import React, { useRef, useState } from 'react';
-import { DataScale } from 'src/model/datasource';
+import DataSource from 'src/model/datasource';
+import { TaskClusterType } from 'src/model/task';
+import { getDataSourceList } from 'src/service/datasource';
+import useList from 'src/util/hook/useList';
 
 const { Option } = Select;
 
-const AddDataSourceDrawer = (props: {
+const AddTaskDrawer = (props: {
   visible: boolean,
   handleSubmit: (values: any) => void,
   handleCancel: () => void,
 }) => {
   const { visible, handleSubmit, handleCancel } = props;
-  const [needExpand, setNeedExpand] = useState(false);
+  const [dsList] = useList<DataSource>(async () => {
+    const { list } = await getDataSourceList();
+    return list;
+  });
+  const [needCustomizeSimilarityApi, setNeedCustomizeSimilarityApi] = useState(false);
+  const [paramWeightInputVisible, setParamWeightInputVisible] = useState(false);
+  const [topologyWeightInputVisible, setTopologyWeightInputVisible] = useState(false);
+  const [param, setParam] = useState<string[]>([]);
   const formInstance = useRef<FormInstance>(null);
+  const handleDataSourceChange = (value: string) => {
+    // eslint-disable-next-line no-underscore-dangle
+    const ds = (dsList as DataSource[]).find((ds) => ds._id === value);
+    if (ds) {
+      setParam(ds.node.param);
+    }
+  };
+  const handleClusterTypeChange = (e: RadioChangeEvent) => {
+    switch (e.target.value) {
+      case TaskClusterType.PARAM_AND_TOPOLOGY:
+        setParamWeightInputVisible(true);
+        setTopologyWeightInputVisible(true);
+        break;
+      case TaskClusterType.PARAM_ONLY:
+        setParamWeightInputVisible(true);
+        break;
+      case TaskClusterType.TOPOLOGY_ONLY:
+        setTopologyWeightInputVisible(true);
+        break;
+      default:
+        break;
+    }
+  };
   const handleButtonClick = () => {
     if (formInstance.current) {
       formInstance.current.submit();
@@ -22,7 +56,7 @@ const AddDataSourceDrawer = (props: {
   };
   return (
     <Drawer
-      title="Add a new data source"
+      title="Build a new task"
       width={480}
       visible={visible}
       onClose={handleCancel}
@@ -47,102 +81,80 @@ const AddDataSourceDrawer = (props: {
           {/* name */}
           <Col span={12}>
             <Form.Item
-              name="name"
-              label="Name"
-              rules={[{ required: true, message: 'Please enter the name' }]}
+              name="datasourceId"
+              label="Datasource"
+              rules={[{ required: true, message: 'choose which datasource you want to analyse' }]}
             >
-              <Input placeholder="symbol of the data source" />
-            </Form.Item>
-          </Col>
-          {/* url */}
-          <Col span={12}>
-            <Form.Item
-              name="url"
-              label="Url"
-              rules={[{ required: true, message: 'Please enter the api url' }]}
-            >
-              <Input placeholder="api url" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          {/* node param */}
-          <Col span={12}>
-            <Form.Item
-              name="nodeParam"
-              label="node param"
-              rules={[{ required: true, message: 'Please enter node\'s params' }]}
-            >
-              <Input placeholder="params of nodes" />
-            </Form.Item>
-          </Col>
-          {/* edge param */}
-          <Col span={12}>
-            <Form.Item
-              name="edgeParam"
-              label="edge param"
-              rules={[{ required: true, message: 'Please enter edge\'s params' }]}
-            >
-              <Input placeholder="params of edges" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          {/* scale */}
-          <Col span={12}>
-            <Form.Item
-              name="scale"
-              label="Scale"
-              rules={[{ required: true, message: 'Please select the scale of data' }]}
-            >
-              <Select placeholder="scale of the data">
-                {Object.values(DataScale).map(
-                  (value: string) => (<Option value={value} key={value}>{value}</Option>),
+              <Select
+                onChange={handleDataSourceChange}
+                placeholder="Select a option and change input text above"
+              >
+                {(dsList as DataSource[]).map(
+                  // eslint-disable-next-line no-underscore-dangle
+                  (ds) => (<Option value={ds._id} key={ds._id}>{ds.name}</Option>),
                 )}
               </Select>
             </Form.Item>
           </Col>
+          {/* updateCycle */}
           <Col span={12}>
-            <Form.Item
-              name="needExpand"
-              label="expand or not"
-            >
-              <Switch checked={needExpand} onChange={() => setNeedExpand(!needExpand)} />
+            <Form.Item label="update cycle">
+              <Form.Item noStyle name="updateCycle" initialValue={0}>
+                <InputNumber min={0} step={30} />
+              </Form.Item>
+              <span>minutes</span>
             </Form.Item>
           </Col>
         </Row>
-        {
-          needExpand && (
-            <Row gutter={16}>
-              {/* expand url */}
+        <Row gutter={16}>
+          {/* cluster type */}
+          <Col span={12}>
+            <Form.Item
+              name="clusterType"
+              label="cluster type"
+              rules={[{ required: true, message: 'select cluster type' }]}
+            >
+              <Radio.Group buttonStyle="solid" onChange={handleClusterTypeChange}>
+                {Object.values(TaskClusterType).map(
+                  (type) => (
+                    <Radio.Button key={type} value={type}>{type}</Radio.Button>
+                  ),
+                )}
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+
+        </Row>
+        <Row gutter={16}>
+          {/* need Customize Similarity Api */}
+          <Col span={12}>
+            <Form.Item
+              name="needCustomizeSimilarityApi"
+              label="if need customize similarity api"
+            >
+              <Switch
+                checked={needCustomizeSimilarityApi}
+                onChange={() => setNeedCustomizeSimilarityApi(!needCustomizeSimilarityApi)}
+              />
+            </Form.Item>
+          </Col>
+          {
+            needCustomizeSimilarityApi && (
               <Col span={12}>
                 <Form.Item
-                  name="expandSourceUrl"
-                  label="expandSourceUrl"
-                  rules={[{ required: true, message: 'Please enter the api url' }]}
+                  name="similarityApi"
+                  label="similarity api"
+                  rules={[{ required: true, message: 'enter the api url' }]}
                 >
-                  <Input placeholder="api url" />
+                  <Input placeholder="similarity api url" />
                 </Form.Item>
               </Col>
-              {/* updateCycle */}
-              <Col span={12}>
-                <Form.Item label="update cycle">
-                  <Form.Item
-                    noStyle
-                    name="updateCycle"
-                    rules={[{ required: true, message: 'Please choose how often to update' }]}
-                  >
-                    <InputNumber min={30} step={30} />
-                  </Form.Item>
-                  <span>minutes</span>
-                </Form.Item>
-              </Col>
-            </Row>
-          )
-        }
+            )
+          }
+        </Row>
       </Form>
     </Drawer>
   );
 };
 
-export default AddDataSourceDrawer;
+export default AddTaskDrawer;

@@ -1,7 +1,17 @@
+import { TaskClusterType } from 'src/model/task';
 import request from 'src/util/Request';
-import Task from 'src/model/task';
 
-export function createTask(params: Task) {
+export interface CreateTaskParams {
+  dataSourceId: string;
+  clusterType: TaskClusterType;
+  paramWeight?: Array<Array<string | number>>;
+  topologyWeight?: number;
+  needCustomizeSimilarityApi: boolean;
+  similarityApi?: string;
+  updateCycle: number;
+}
+
+export function createTask(params: CreateTaskParams) {
   return request('/task', {
     method: 'POST',
     body: JSON.stringify(params),

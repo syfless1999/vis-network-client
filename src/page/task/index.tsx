@@ -1,18 +1,15 @@
 import React, { useCallback, useState } from 'react';
-import DataSource from 'src/model/datasource';
-import useDataSourceList from 'src/util/hook/useDataSourceList';
 import SearchAndAddBar from 'src/page/component/SearchAndAddBar';
-import { createDataSource, CreateDataSourceParams } from 'src/service/datasource';
 import useList from 'src/util/hook/useList';
-import request from 'src/util/Request';
-import { getTaskList } from 'src/service/task';
+import { createTask, CreateTaskParams, getTaskList } from 'src/service/task';
+import Task from 'src/model/task';
 import AddTaskDrawer from './AddTaskDrawer';
 import TaskList from './TaskList';
 
 const DataSourcePanel = () => {
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
   const [list] = useList(async () => {
-    const list = await getTaskList();
+    const { list } = await getTaskList();
     return list;
   });
 
@@ -21,24 +18,18 @@ const DataSourcePanel = () => {
     [drawerVisible],
   );
 
-  const handleAddSubmit = (values: any) => {
-    const params = {
-      ...values,
-      expandSource: {
-        url: values.expandSourceUrl,
-        updateCycle: values.updateCycle,
-      },
-    };
-    createDataSource(params as CreateDataSourceParams)
-      .then(() => {
-        changeDrawerVisible();
-      });
+  const handleAddSubmit = (params: any) => {
+    console.log(params);
+    // createTask(params as CreateTaskParams)
+    //   .then(() => {
+    //     changeDrawerVisible();
+    //   });
   };
 
   return (
     <div>
       <SearchAndAddBar title="Task List" handleClick={changeDrawerVisible} />
-      <TaskList dataSource={list as Array<DataSource>} />
+      <TaskList list={list as Array<Task>} />
       <AddTaskDrawer
         visible={drawerVisible}
         handleCancel={changeDrawerVisible}

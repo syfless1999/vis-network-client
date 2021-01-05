@@ -1,8 +1,8 @@
 /* eslint-disable semi */
 export enum TaskClusterType {
-  PARAM_ONLY = 'PARAM_ONLY',
-  TOPOLOGY_ONLY = 'TOPOLOGY_ONLY',
-  PARAM_AND_TOPOLOGY = 'PARAM_AND_TOPOLOGY',
+  PARAM_ONLY = 'PARAM',
+  TOPOLOGY_ONLY = 'TOPOLOGY',
+  PARAM_AND_TOPOLOGY = 'ALL',
 }
 
 export interface ParamWeightObject {
@@ -11,8 +11,9 @@ export interface ParamWeightObject {
 
 export default interface Task {
   _id: string;
-  dataSourceId: string;
-  clusterType: TaskClusterType;
+  progress: number; // display
+  dataSourceId: string; // display
+  clusterType: TaskClusterType; // display
   paramWeight?: Array<Array<string | number>>;
   topologyWeight?: number;
   needCustomizeSimilarityApi: boolean;

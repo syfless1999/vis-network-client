@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-const useList = (fetchApi: () => Promise<Array<any>>) => {
-  const [list, setList] = useState<Array<any>>([]);
+const useList = <T>(fetchApi: () => Promise<any[]>) => {
+  const [list, setList] = useState<Array<T>>([]);
 
   useEffect(() => {
     async function fetch() {
