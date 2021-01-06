@@ -18,12 +18,22 @@ const DataSourcePanel = () => {
     [drawerVisible],
   );
 
-  const handleAddSubmit = (params: any) => {
-    console.log(params);
-    // createTask(params as CreateTaskParams)
-    //   .then(() => {
-    //     changeDrawerVisible();
-    //   });
+  const handleAddSubmit = (values: any) => {
+    const params: any = {};
+    params.paramWeight = [];
+
+    Object.keys(values).forEach((key) => {
+      if (key.startsWith('param,')) {
+        const paramName = key.split(',')[1];
+        params.paramWeight.push([paramName, values[key]]);
+      } else if (key !== 'paramWeight') {
+        params[key] = values[key];
+      }
+    });
+    createTask(params as unknown as CreateTaskParams)
+      .then(() => {
+        changeDrawerVisible();
+      });
   };
 
   return (

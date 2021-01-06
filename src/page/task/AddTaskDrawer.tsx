@@ -22,32 +22,18 @@ const AddTaskDrawer = (props: {
     return list;
   });
   const [needCustomizeSimilarityApi, setNeedCustomizeSimilarityApi] = useState(false);
-  const [paramWeightInputVisible, setParamWeightInputVisible] = useState(false);
-  const [topologyWeightInputVisible, setTopologyWeightInputVisible] = useState(false);
-  const [param, setParam] = useState<string[]>([]);
+  const [clusterType, setClusterType] = useState<TaskClusterType>();
+  const [nodeParamSet, setNodeParamSet] = useState<string[]>([]);
   const formInstance = useRef<FormInstance>(null);
   const handleDataSourceChange = (value: string) => {
     // eslint-disable-next-line no-underscore-dangle
     const ds = (dsList as DataSource[]).find((ds) => ds._id === value);
     if (ds) {
-      setParam(ds.node.param);
+      setNodeParamSet(ds.node.param);
     }
   };
   const handleClusterTypeChange = (e: RadioChangeEvent) => {
-    switch (e.target.value) {
-      case TaskClusterType.PARAM_AND_TOPOLOGY:
-        setParamWeightInputVisible(true);
-        setTopologyWeightInputVisible(true);
-        break;
-      case TaskClusterType.PARAM_ONLY:
-        setParamWeightInputVisible(true);
-        break;
-      case TaskClusterType.TOPOLOGY_ONLY:
-        setTopologyWeightInputVisible(true);
-        break;
-      default:
-        break;
-    }
+    setClusterType(e.target.value);
   };
   const handleButtonClick = () => {
     if (formInstance.current) {
@@ -57,7 +43,7 @@ const AddTaskDrawer = (props: {
   return (
     <Drawer
       title="Build a new task"
-      width={480}
+      width={540}
       visible={visible}
       onClose={handleCancel}
       bodyStyle={{ paddingBottom: 80 }}
@@ -81,7 +67,7 @@ const AddTaskDrawer = (props: {
           {/* name */}
           <Col span={12}>
             <Form.Item
-              name="datasourceId"
+              name="dataSourceId"
               label="Datasource"
               rules={[{ required: true, message: 'choose which datasource you want to analyse' }]}
             >
@@ -108,13 +94,16 @@ const AddTaskDrawer = (props: {
         </Row>
         <Row gutter={16}>
           {/* cluster type */}
-          <Col span={12}>
+          <Col span={24}>
             <Form.Item
               name="clusterType"
               label="cluster type"
               rules={[{ required: true, message: 'select cluster type' }]}
             >
-              <Radio.Group buttonStyle="solid" onChange={handleClusterTypeChange}>
+              <Radio.Group
+                buttonStyle="solid"
+                onChange={handleClusterTypeChange}
+              >
                 {Object.values(TaskClusterType).map(
                   (type) => (
                     <Radio.Button key={type} value={type}>{type}</Radio.Button>
@@ -123,14 +112,62 @@ const AddTaskDrawer = (props: {
               </Radio.Group>
             </Form.Item>
           </Col>
-
         </Row>
+        {
+          clusterType === TaskClusterType.PARAM_AND_TOPOLOGY
+          && (
+            <Row gutter={16}>
+              <Col>
+                <Form.Item
+                  name="paramWeight"
+                  label="param weight"
+                  rules={[{ required: true, message: 'weight need input' }]}
+                >
+                  <InputNumber min={0} max={1} step={0.1} />
+                </Form.Item>
+              </Col>
+              <Col>
+                <Form.Item
+                  name="topologyWeight"
+                  label="topology weight"
+                  rules={[{ required: true, message: 'weight need input' }]}
+                >
+                  <InputNumber min={0} max={1} step={0.1} />
+                </Form.Item>
+              </Col>
+            </Row>
+          )
+        }
+        {
+          clusterType
+          && clusterType !== TaskClusterType.TOPOLOGY_ONLY
+          && nodeParamSet.length
+          && (
+            <Row gutter={16}>
+              {
+                nodeParamSet.map((param) => (
+                  <Col key={`param${param}`}>
+                    <Form.Item name={`param,${param}`} initialValue={0}>
+                      <InputNumber
+                        min={0}
+                        max={1}
+                        step={0.1}
+                        formatter={(value) => `${param}: ${value}`}
+                      />
+                    </Form.Item>
+                  </Col>
+                ))
+              }
+            </Row>
+          )
+        }
         <Row gutter={16}>
           {/* need Customize Similarity Api */}
           <Col span={12}>
             <Form.Item
               name="needCustomizeSimilarityApi"
               label="if need customize similarity api"
+              initialValue={false}
             >
               <Switch
                 checked={needCustomizeSimilarityApi}
