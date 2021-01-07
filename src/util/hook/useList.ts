@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react';
+import {
+  useState, useEffect, Dispatch, SetStateAction,
+} from 'react';
 
-const useList = <T>(fetchApi: () => Promise<any[]>) => {
+function useList<T>(fetchApi: () => Promise<any[]>, deps: Array<any> = []): [
+  list: T[],
+  setList: Dispatch<SetStateAction<T[]>>,
+  forceUpdate: () => void,
+] {
   const [list, setList] = useState<Array<T>>([]);
+  const [obj, setObj] = useState({});
+  const forceUpdate = () => setObj({});
 
   useEffect(() => {
     async function fetch() {
@@ -9,12 +17,13 @@ const useList = <T>(fetchApi: () => Promise<any[]>) => {
       setList(data);
     }
     fetch();
-  }, []);
+  }, [...deps, obj]);
 
   return [
     list,
     setList,
+    forceUpdate,
   ];
-};
+}
 
 export default useList;

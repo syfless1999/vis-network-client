@@ -23,13 +23,13 @@ const AddTaskDrawer = (props: {
   });
   const [needCustomizeSimilarityApi, setNeedCustomizeSimilarityApi] = useState(false);
   const [clusterType, setClusterType] = useState<TaskClusterType>();
-  const [nodeParamSet, setNodeParamSet] = useState<string[]>([]);
+  const [paramSet, setParamSet] = useState<string[]>([]);
   const formInstance = useRef<FormInstance>(null);
   const handleDataSourceChange = (value: string) => {
     // eslint-disable-next-line no-underscore-dangle
     const ds = (dsList as DataSource[]).find((ds) => ds._id === value);
     if (ds) {
-      setNodeParamSet(ds.node.param);
+      setParamSet(ds.node.param);
     }
   };
   const handleClusterTypeChange = (e: RadioChangeEvent) => {
@@ -140,26 +140,26 @@ const AddTaskDrawer = (props: {
         }
         {
           clusterType
-          && clusterType !== TaskClusterType.TOPOLOGY_ONLY
-          && nodeParamSet.length
-          && (
-            <Row gutter={16}>
-              {
-                nodeParamSet.map((param) => (
-                  <Col key={`param${param}`}>
-                    <Form.Item name={`param,${param}`} initialValue={0}>
-                      <InputNumber
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        formatter={(value) => `${param}: ${value}`}
-                      />
-                    </Form.Item>
-                  </Col>
-                ))
-              }
-            </Row>
-          )
+            && clusterType !== TaskClusterType.TOPOLOGY_ONLY
+            && paramSet.length
+            ? (
+              <Row gutter={16}>
+                {
+                  paramSet.map((param) => (
+                    <Col key={`param${param}`}>
+                      <Form.Item name={`param,${param}`} initialValue={0}>
+                        <InputNumber
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          formatter={(value) => `${param}: ${value}`}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ))
+                }
+              </Row>
+            ) : null
         }
         <Row gutter={16}>
           {/* need Customize Similarity Api */}

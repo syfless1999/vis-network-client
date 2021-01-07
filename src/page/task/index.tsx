@@ -8,8 +8,12 @@ import TaskList from './TaskList';
 
 const DataSourcePanel = () => {
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
-  const [list] = useList(async () => {
+  const [list, , forceUpdate] = useList(async () => {
     const { list } = await getTaskList();
+    list.forEach((task: any) => {
+      // eslint-disable-next-line no-param-reassign
+      task.dataSourceName = task.dataSource[0].name;
+    });
     return list;
   });
 
@@ -33,6 +37,7 @@ const DataSourcePanel = () => {
     createTask(params as unknown as CreateTaskParams)
       .then(() => {
         changeDrawerVisible();
+        forceUpdate();
       });
   };
 

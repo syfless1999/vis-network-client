@@ -1,25 +1,35 @@
 import React from 'react';
-import { Table, Statistic } from 'antd';
+import { Table, Statistic, Typography } from 'antd';
 import Task from 'src/model/task';
 
+const { Title } = Typography;
 const { Column } = Table;
 
 function DataSourceList(props: { list: Array<Task> }) {
   const { list } = props;
   return (
     <Table rowKey="_id" dataSource={list}>
-      <Column title="datasource id" dataIndex="dataSourceId" key="dataSourceId" />
-      <Column title="cluster type" dataIndex="clusterType" key="clusterType" />
+      <Column
+        title="datasource"
+        dataIndex="dataSourceName"
+        key="dataSource"
+        render={(value) => <Title level={4}>{value}</Title>}
+      />
+      <Column
+        title="cluster type"
+        dataIndex="clusterType"
+        key="clusterType"
+      />
       <Column
         title="progress"
         dataIndex="progress"
         key="progress"
         render={(progress: number) => (
           <Statistic
-            title="Active"
-            value={progress || 11.28}
-            precision={2}
-            valueStyle={{ color: '#3f8600' }}
+            title={progress < 100 ? 'Active' : 'Finished'}
+            value={progress}
+            precision={1}
+            valueStyle={{ color: progress < 100 ? '#3f8600' : '#cf1322' }}
             suffix="%"
           />
         )}
