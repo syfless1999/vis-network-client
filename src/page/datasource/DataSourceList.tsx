@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import styled from 'styled-components';
 import DataSource, { EdgeFeature, NodeFeature } from 'src/model/datasource';
-import { getRandomColor } from 'src/util/color';
+import { getRandomColor } from 'src/util/color/dataSourceColor';
 import { numberSimplify } from 'src/util/number';
 
 const { Column } = Table;
