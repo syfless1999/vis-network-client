@@ -34,5 +34,5 @@ const colorSets = [
   },
 ];
 
-const clusterColorMap = new Map();
-export { clusterColorMap, colorSets };
+const colorMap = new Map();
+export { colorMap, colorSets };

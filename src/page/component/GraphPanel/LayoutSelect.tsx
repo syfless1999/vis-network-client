@@ -5,7 +5,26 @@ import { Select } from 'antd';
 const SelectOption = Select.Option;
 
 export const layouts = [
-  { type: 'graphin-force' },
+  {
+    type: 'graphin-force',
+    preset: {
+      type: 'concentric',
+    },
+    animation: true,
+    defSpringLen: (
+      _edge: any,
+      source: { data: { layout: { degree: any; }; }; },
+      target: { data: { layout: { degree: any; }; }; },
+    ) => {
+      /** 默认返回的是 200 的弹簧长度 */
+      /** 如果你要想要产生聚类的效果，可以考虑 根据边两边节点的度数来动态设置边的初始化长度：度数越小，则边越短 */
+      const nodeSize = 30;
+      const Sdegree = source.data.layout.degree;
+      const Tdegree = target.data.layout.degree;
+      const minDegree = Math.min(Sdegree, Tdegree);
+      return minDegree < 3 ? nodeSize * 5 : (minDegree + 2) * nodeSize;
+    },
+  },
   {
     type: 'grid',
     // begin: [0, 0], // 可选，

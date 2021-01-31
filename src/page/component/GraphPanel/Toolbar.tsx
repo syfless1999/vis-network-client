@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
-import { GraphinContext } from '@antv/graphin';
-import { ZoomOutOutlined, ZoomInOutlined, DownloadOutlined } from '@ant-design/icons';
+import { G6, GraphinContext } from '@antv/graphin';
+import {
+  ZoomOutOutlined, ZoomInOutlined, DownloadOutlined, EyeOutlined,
+} from '@ant-design/icons';
 import { Button } from 'antd';
 
 interface ToolbarOption {
@@ -12,6 +14,7 @@ interface ToolbarOption {
 const Toolbar = () => {
   const { apis, graph } = useContext(GraphinContext);
   const { handleZoomIn, handleZoomOut } = apis;
+
   const options: ToolbarOption[] = [
     {
       id: 'zoomIn',
@@ -35,6 +38,25 @@ const Toolbar = () => {
         graph.downloadFullImage('visual-network-pic');
       },
     },
+    // {
+    //   id: 'fisheye',
+    //   icon: <EyeOutlined />,
+    //   action: () => {
+    //     const fishEye = new G6.Fisheye({
+    //       d: 1.5,
+    //       r: 100,
+    //       showLabel: false,
+    //     });
+    //     const escListener = (e: KeyboardEvent) => {
+    //       if (e.code === 'Escape') {
+    //         graph.removePlugin(fishEye);
+    //         window.removeEventListener('keydown', escListener);
+    //       }
+    //     };
+    //     graph.addPlugin(fishEye);
+    //     window.addEventListener('keydown', escListener);
+    //   },
+    // },
   ];
   return (
     <>
