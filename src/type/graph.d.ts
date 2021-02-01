@@ -1,11 +1,13 @@
 export interface NodeConfig {
   id: string;
   clusterId?: string;
+  [key?: string]: unknown;
 }
 export interface EdgeConfig {
   source: string;
   target: string;
   weight?: number;
+  [key?: string]: unknown;
 }
 export interface GraphData {
   nodes: NodeConfig[];
