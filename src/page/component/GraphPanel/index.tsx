@@ -4,19 +4,26 @@ import { GraphinData } from '@antv/graphin/lib/typings/type';
 import { Switch } from 'antd';
 
 import lpa from 'src/util/cluster/lpa';
-import { GraphData } from 'src/type/graph';
+import { ClusterData, GraphData } from 'src/type/graph';
 import { clusterData2GraphData } from 'src/util/cluster/louvain';
+import { LayerNetwork } from 'src/type/network';
 
 import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelect';
 
 import '@antv/graphin/dist/index.css';
 
+interface GraphPanelProps {
+  sourceData: LayerNetwork;
+}
+
 const {
   ZoomCanvas, FitView, ActivateRelations,
 } = Behaviors;
 
-const GraphPanel = () => {
+const GraphPanel = (props: GraphPanelProps) => {
+  // props
+  const { sourceData } = props;
   // raw data
   const [rawData, setRawData] = useState<GraphData>({ nodes: [], edges: [] });
   // cluster data
@@ -49,7 +56,7 @@ const GraphPanel = () => {
       };
       setRawData(json);
       const clusterRes = lpa(json, false, 'value');
-      const clusterData = clusterData2GraphData(clusterRes);
+      const clusterData = clusterData2GraphData(clusterRes as ClusterData);
       setClusterData(clusterData);
     }
     fetchData();

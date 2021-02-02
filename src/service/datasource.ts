@@ -1,4 +1,4 @@
-import { DataScale } from 'src/model/datasource';
+import DataSource, { DataScale } from 'src/model/datasource';
 import request from 'src/util/Request';
 
 export interface CreateDataSourceParams {
@@ -25,5 +25,5 @@ export function createDataSource(params: CreateDataSourceParams) {
 }
 
 export function getDataSourceList() {
-  return request('/datasource');
+  return request<DataSource[]>('/datasource');
 }

@@ -1,4 +1,4 @@
-import { TaskClusterType } from 'src/model/task';
+import Task, { TaskClusterType } from 'src/model/task';
 import request from 'src/util/Request';
 
 export interface CreateTaskParams {
@@ -22,5 +22,5 @@ export function createTask(params: CreateTaskParams) {
 }
 
 export function getTaskList() {
-  return request('/task');
+  return request<Task[]>('/task');
 }

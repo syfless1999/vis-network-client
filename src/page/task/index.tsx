@@ -8,13 +8,13 @@ import TaskList from './TaskList';
 
 const DataSourcePanel = () => {
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
-  const [list, , forceUpdate] = useList(async () => {
-    const { list } = await getTaskList();
-    list.forEach((task: any) => {
+  const [list, , forceUpdate] = useList<Task>(async () => {
+    const data = await getTaskList();
+    data.forEach((task: any) => {
       // eslint-disable-next-line no-param-reassign
       task.dataSourceName = task.dataSource[0].name;
     });
-    return list;
+    return data;
   });
 
   const changeDrawerVisible = useCallback(
@@ -44,7 +44,7 @@ const DataSourcePanel = () => {
   return (
     <div>
       <SearchAndAddBar title="Task List" handleClick={changeDrawerVisible} />
-      <TaskList list={list as Array<Task>} />
+      <TaskList list={list} />
       <AddTaskDrawer
         visible={drawerVisible}
         handleCancel={changeDrawerVisible}

@@ -18,8 +18,8 @@ const AddTaskDrawer = (props: {
 }) => {
   const { visible, handleSubmit, handleCancel } = props;
   const [dsList] = useList<DataSource>(async () => {
-    const { list } = await getDataSourceList();
-    return list;
+    const data = await getDataSourceList();
+    return data;
   });
   const [needCustomizeSimilarityApi, setNeedCustomizeSimilarityApi] = useState(false);
   const [clusterType, setClusterType] = useState<TaskClusterType>();
