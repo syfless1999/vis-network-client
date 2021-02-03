@@ -1,5 +1,5 @@
 import G6 from '@antv/g6';
-import { ClusterData, GraphData } from 'src/type/graph';
+import { ClusterData } from 'src/type/graph';
 import { colorSets, colorMap } from '../color/graphColor';
 import { hexToRgbaToHex } from '../color/hexToRgba';
 
@@ -9,7 +9,7 @@ const { uniqueId } = G6.Util;
 const nodeSize = 40;
 const badgeSize = 12;
 
-export const clusterData2GraphData = (clusterData: ClusterData, source?: GraphData) => {
+export const clusterData2GraphData = (clusterData: ClusterData) => {
   const nodes = clusterData.clusters.map((node, index) => {
     const primaryColor = colorSets[index].mainFill;
     colorMap.set(node.id, primaryColor);

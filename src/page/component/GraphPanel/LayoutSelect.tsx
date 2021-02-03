@@ -72,7 +72,12 @@ const LayoutSelector = (props: LayoutSelectorProps) => {
   // 包裹在graphin内部的组件，将获得graphin提供的额外props
 
   return (
-    <Select bordered={false} value={value} onChange={onChange}>
+    <Select
+      bordered={false}
+      value={value}
+      onChange={onChange}
+      placeholder="layout type"
+    >
       {layouts.map((item) => {
         const { type } = item;
         return (
