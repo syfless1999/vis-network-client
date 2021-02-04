@@ -22,10 +22,8 @@ const { Option: SelectOption } = Select;
 const GraphPanel = (props: GraphPanelProps) => {
   // props
   const { sourceData } = props;
-  const maxLevel = sourceData.length;
+  const maxLevel = sourceData.length - 1;
 
-  // state: display data
-  const [displayData, setDisplayData] = useState<DisplayNetwork>({ nodes: [], edges: [] });
   // state: layout
   const [layout, setLayout] = useState('graphin-force');
   const handleChangeLayout = (value: string) => setLayout(value);
@@ -36,11 +34,14 @@ const GraphPanel = (props: GraphPanelProps) => {
       setLevel(value);
     }
   };
-
+  // state: display data
+  const [displayData, setDisplayData] = useState<DisplayNetwork>({ nodes: [], edges: [] });
   useEffect(() => {
-    if (sourceData.length) {
-      const styledNetwork = networkStyleWrapper(sourceData[level]);
-      setDisplayData(styledNetwork);
+    setLevel(maxLevel);
+  }, [sourceData]);
+  useEffect(() => {
+    if (level >= 0) {
+      setDisplayData(networkStyleWrapper(sourceData[level]));
     }
   }, [level]);
 
@@ -67,7 +68,7 @@ const GraphPanel = (props: GraphPanelProps) => {
         placeholder="cluster level"
       >
         {
-          Array.from({ length: maxLevel }).map((_, index) => {
+          Array.from({ length: sourceData.length }).map((_, index) => {
             const levelText = getLevelText(index, maxLevel);
             return (
               <SelectOption key={levelText} value={index}>

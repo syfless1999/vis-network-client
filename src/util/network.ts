@@ -13,8 +13,7 @@ export const getLevelText = (level: number, maxLevel: number) => {
   const conditions: [boolean, string][] = [
     [level > maxLevel, 'oversized level'],
     [level === 0, 'source network'],
-    [level === maxLevel, 'highest level'],
-    [true, `${level} level`],
+    [true, `level-${level}`],
   ];
   let res = '';
   for (let i = 0; i < conditions.length; i += 1) {
