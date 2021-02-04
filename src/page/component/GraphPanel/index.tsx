@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Graphin, { Behaviors } from '@antv/graphin';
 import { Select } from 'antd';
+import { ContextMenu } from '@antv/graphin-components';
 
 import { DisplayNetwork, LayerNetwork } from 'src/type/network';
 import { getLevelText, networkStyleWrapper } from 'src/util/network';
@@ -9,6 +10,7 @@ import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelect';
 
 import '@antv/graphin/dist/index.css';
+import NodeMenu from './NodeMenu';
 
 interface GraphPanelProps {
   sourceData: LayerNetwork;
@@ -36,6 +38,7 @@ const GraphPanel = (props: GraphPanelProps) => {
   };
   // state: display data
   const [displayData, setDisplayData] = useState<DisplayNetwork>({ nodes: [], edges: [] });
+
   useEffect(() => {
     setLevel(maxLevel);
   }, [sourceData]);
@@ -51,6 +54,10 @@ const GraphPanel = (props: GraphPanelProps) => {
       data={displayData}
       layout={layoutType}
     >
+      {/* 右键菜单：展开、收起 */}
+      <ContextMenu>
+        <NodeMenu displayData={displayData} />
+      </ContextMenu>
       {/* 滚轮放大缩小：关闭 */}
       <ZoomCanvas disabled />
       {/* 关联高亮 */}

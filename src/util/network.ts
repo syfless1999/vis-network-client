@@ -41,7 +41,7 @@ export const getCommunityColor = (c: Community, index: number) => {
 };
 
 export const isNode = (c: Community): c is Node => 'clusterId' in c && !('nodes' in c);
-export const isHeadCluster = (c: Community): c is HeadCluster => !('clusterId' in c) && 'nodes' in c;
+export const isHeadCluster = (c: Community): c is HeadCluster => 'nodes' in c;
 export const isCluster = (c: Community): c is Cluster => 'clusterId' in c && 'nodes' in c;
 export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
 
@@ -143,7 +143,7 @@ export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
 
   nodes.forEach((node, index) => {
     const color = getCommunityColor(node, index);
-    if (isCluster(node) || isHeadCluster(node)) {
+    if (isHeadCluster(node)) {
       styledNodes.push(clusterStyleWrapper(node, color));
     } else if (isNode(node)) {
       styledNodes.push(nodeStyleWrapper(node, color));
