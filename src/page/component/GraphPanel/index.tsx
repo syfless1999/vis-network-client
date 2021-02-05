@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Graphin, { Behaviors } from '@antv/graphin';
 import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 
 import { DisplayNetwork, LayerNetwork } from 'src/type/network';
-import { getLevelText, networkStyleWrapper } from 'src/util/network';
+import { getLevelText, getNetworkMap, networkStyleWrapper } from 'src/util/network';
 
 import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelect';
@@ -38,6 +38,11 @@ const GraphPanel = (props: GraphPanelProps) => {
   };
   // state: display data
   const [displayData, setDisplayData] = useState<DisplayNetwork>({ nodes: [], edges: [] });
+  // memo: community map
+  const communityMap = useMemo(() => {
+    const nodes = sourceData.map((layer) => layer.nodes);
+    return getNetworkMap(nodes);
+  }, [sourceData]);
 
   useEffect(() => {
     setLevel(maxLevel);
@@ -56,7 +61,12 @@ const GraphPanel = (props: GraphPanelProps) => {
     >
       {/* 右键菜单：展开、收起 */}
       <ContextMenu>
-        <NodeMenu displayData={displayData} />
+        <NodeMenu
+          sourceData={sourceData}
+          displayData={displayData}
+          setDisplayData={setDisplayData}
+          communityMap={communityMap}
+        />
       </ContextMenu>
       {/* 滚轮放大缩小：关闭 */}
       <ZoomCanvas disabled />

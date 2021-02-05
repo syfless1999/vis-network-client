@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
-import { G6, GraphinContext } from '@antv/graphin';
+import { GraphinContext } from '@antv/graphin';
 import {
-  ZoomOutOutlined, ZoomInOutlined, DownloadOutlined, EyeOutlined,
+  ZoomOutOutlined, ZoomInOutlined, DownloadOutlined,
 } from '@ant-design/icons';
 import { Button } from 'antd';
 

@@ -28,16 +28,29 @@ export const getClusterDisplaySize = (c: HeadCluster) => {
   const cSize = c.nodeNum;
   return Math.min((cSize / sizeUnit + 1), 5);
 };
-export const getCommunityColor = (c: Community, index: number) => {
+export const getCommunityColor = (c: Community, index?: number) => {
   const { clusterId, id } = c;
   let color;
   if (clusterId && colorMap.has(clusterId)) {
     color = colorMap.get(clusterId);
   } else {
-    color = colorSets[index % colorSets.length].mainFill;
+    const hash = (index || Math.floor(Math.random() * colorSets.length)) % colorSets.length;
+    color = colorSets[hash].mainFill;
     colorMap.set(id, color);
   }
   return color;
+};
+type RNetworkArray = (Node | HeadCluster)[] | RNetworkArray[];
+export const getNetworkMap = (cs: RNetworkArray, map?: Map<string, Node | HeadCluster>) => {
+  const cmap = map || new Map<string, Node | HeadCluster>();
+  cs.forEach((c: (Node | HeadCluster | RNetworkArray)) => {
+    if (Array.isArray(c)) {
+      getNetworkMap(c, cmap);
+    } else {
+      cmap.set(c.id, c);
+    }
+  });
+  return cmap;
 };
 
 export const isNode = (c: Community): c is Node => 'clusterId' in c && !('nodes' in c);
@@ -45,19 +58,20 @@ export const isHeadCluster = (c: Community): c is HeadCluster => 'nodes' in c;
 export const isCluster = (c: Community): c is Cluster => 'clusterId' in c && 'nodes' in c;
 export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
 
-export const clusterStyleWrapper = (c: HeadCluster, color: string) => {
+export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
   const cSize = getClusterDisplaySize(c);
   const kSize = cSize * keyshapeSize;
   const fSize = kSize / 1.6;
   const bSize = cSize * badgeSize;
+  const cColor = color || getCommunityColor(c);
   const { id, nodes: { length } } = c;
   const sc = {
     ...c,
     style: {
       keyshape: {
-        fill: hexToRgbaToHex(color, 0.1),
+        fill: hexToRgbaToHex(cColor, 0.1),
         strokeWidth: 1.2,
-        stroke: color,
+        stroke: cColor,
         size: [kSize, kSize],
       },
       label: {
@@ -65,7 +79,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color: string) => {
         fill: hexToRgbaToHex('#000', 0.85),
       },
       halo: {
-        fill: hexToRgbaToHex(color, 0.1),
+        fill: hexToRgbaToHex(cColor, 0.1),
         strokeWidth: 1.2,
         stroke: color,
       },
@@ -73,7 +87,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color: string) => {
         fontFamily: 'graphin',
         type: 'font',
         value: id,
-        fill: color,
+        fill: cColor,
         size: fSize,
       },
       badges: [
@@ -82,8 +96,8 @@ export const clusterStyleWrapper = (c: HeadCluster, color: string) => {
           type: 'text',
           value: length,
           size: [bSize, bSize],
-          fill: color,
-          stroke: color,
+          fill: cColor,
+          stroke: cColor,
           color: '#fff',
           fontSize: bSize * 0.8,
           padding: 0,
@@ -94,15 +108,16 @@ export const clusterStyleWrapper = (c: HeadCluster, color: string) => {
   };
   return sc;
 };
-export const nodeStyleWrapper = (n: Node, color: string) => {
+export const nodeStyleWrapper = (n: Node, color?: string) => {
   const { id } = n;
+  const cColor = color || getCommunityColor(n);
   const sn = {
     ...n,
     style: {
       keyshape: {
-        fill: hexToRgbaToHex(color, 0.1),
+        fill: hexToRgbaToHex(cColor, 0.1),
         strokeWidth: 0.5,
-        stroke: color,
+        stroke: cColor,
         size: [keyshapeSize, keyshapeSize],
       },
       label: {
@@ -113,13 +128,19 @@ export const nodeStyleWrapper = (n: Node, color: string) => {
         fontFamily: 'graphin',
         type: 'font',
         value: id,
-        fill: color,
+        fill: cColor,
         size: keyshapeSize * 0.5,
       },
       badges: [],
     },
   };
   return sn;
+};
+export const communityStyleWrapper = (n: Node | HeadCluster, color?: string) => {
+  if (isHeadCluster(n)) {
+    return clusterStyleWrapper(n, color);
+  }
+  return nodeStyleWrapper(n, color);
 };
 export const edgeStyleWrapper = (e: Edge) => {
   const se = {
@@ -143,11 +164,7 @@ export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
 
   nodes.forEach((node, index) => {
     const color = getCommunityColor(node, index);
-    if (isHeadCluster(node)) {
-      styledNodes.push(clusterStyleWrapper(node, color));
-    } else if (isNode(node)) {
-      styledNodes.push(nodeStyleWrapper(node, color));
-    }
+    styledNodes.push(communityStyleWrapper(node, color));
   });
 
   edges.forEach((edge) => {
