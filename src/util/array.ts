@@ -1,12 +1,20 @@
+/**
+ * delete items which fit cb function, regardless of order
+ * @param arr array need to handle
+ * @param cb if cb(item) returns true, this item will be deleted
+ * @returns items which are deleted
+ */
 export const deleteItemWithoutOrder = <T>(
   arr: T[],
   cb: (item: T) => boolean,
-): void => {
+): T[] => {
   const len = arr.length;
   let count = 0;
+  const res: T[] = [];
   for (let i = 0; i < len; i += 1) {
     if (i === len - count) {
-      arr.pop();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      res.push(arr.pop()!);
       // eslint-disable-next-line no-continue
       continue;
     }
@@ -18,4 +26,5 @@ export const deleteItemWithoutOrder = <T>(
       i -= 1;
     }
   }
+  return res;
 };

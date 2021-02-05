@@ -1,5 +1,5 @@
 import {
-  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, Node,
+  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, LayerNetwork, Node,
 } from 'src/type/network';
 import { colorSets, colorMap } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from './color/hexToRgba';
@@ -8,6 +8,11 @@ import { hexToRgbaToHex } from './color/hexToRgba';
 const keyshapeSize = 20;
 const sizeUnit = 3;
 const badgeSize = 12;
+
+export const isNode = (c: Community): c is Node => 'clusterId' in c && !('nodes' in c);
+export const isHeadCluster = (c: Community): c is HeadCluster => 'nodes' in c;
+export const isCluster = (c: Community): c is Cluster => 'clusterId' in c && 'nodes' in c;
+export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
 
 export const getLevelText = (level: number, maxLevel: number) => {
   const conditions: [boolean, string][] = [
@@ -40,6 +45,28 @@ export const getCommunityColor = (c: Community, index?: number) => {
   }
   return color;
 };
+export const getRelatedCommunities = (
+  c: Node | HeadCluster,
+  sourceData: LayerNetwork,
+  dataMap: Map<string, HeadCluster | Node>,
+): (Node | HeadCluster
+)[] => {
+  const relatedCommunities: (Node | HeadCluster)[] = [];
+  // TODO 只考虑了向上查找的情况
+  if (isHeadCluster(c)) {
+    return [];
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  let prevCluster: HeadCluster | Cluster | Node = dataMap.get(c.clusterId)!;
+  while (isCluster(prevCluster)) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    prevCluster = dataMap.get(prevCluster.clusterId)!;
+    relatedCommunities.push(prevCluster);
+  }
+  console.log(c);
+  console.log(relatedCommunities);
+  return relatedCommunities;
+};
 type RNetworkArray = (Node | HeadCluster)[] | RNetworkArray[];
 export const getNetworkMap = (cs: RNetworkArray, map?: Map<string, Node | HeadCluster>) => {
   const cmap = map || new Map<string, Node | HeadCluster>();
@@ -52,11 +79,6 @@ export const getNetworkMap = (cs: RNetworkArray, map?: Map<string, Node | HeadCl
   });
   return cmap;
 };
-
-export const isNode = (c: Community): c is Node => 'clusterId' in c && !('nodes' in c);
-export const isHeadCluster = (c: Community): c is HeadCluster => 'nodes' in c;
-export const isCluster = (c: Community): c is Cluster => 'clusterId' in c && 'nodes' in c;
-export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
 
 export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
   const cSize = getClusterDisplaySize(c);
