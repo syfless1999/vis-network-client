@@ -33,7 +33,7 @@ const CustomMenu = (props: NodeMenuProps) => {
       //  11. 删除已有节点
       const { nodes, edges } = displayData;
       deleteItemWithoutOrder(nodes, (node) => node.id === model.id);
-      //  12. 装饰新节点
+      //  12. 装饰并添加新节点
       const displayNodes = [...nodes];
       model.nodes.forEach((nodeId) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

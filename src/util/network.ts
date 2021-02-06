@@ -63,8 +63,6 @@ export const getRelatedCommunities = (
     prevCluster = dataMap.get(prevCluster.clusterId)!;
     relatedCommunities.push(prevCluster);
   }
-  console.log(c);
-  console.log(relatedCommunities);
   return relatedCommunities;
 };
 type RNetworkArray = (Node | HeadCluster)[] | RNetworkArray[];
