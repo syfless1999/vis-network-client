@@ -1,5 +1,5 @@
 import {
-  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, LayerNetwork, Node,
+  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, Node, NodeMap,
 } from 'src/type/network';
 import { colorSets, colorMap } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from './color/hexToRgba';
@@ -12,7 +12,21 @@ const badgeSize = 12;
 export const isNode = (c: Community): c is Node => 'clusterId' in c && !('nodes' in c);
 export const isHeadCluster = (c: Community): c is HeadCluster => 'nodes' in c;
 export const isCluster = (c: Community): c is Cluster => 'clusterId' in c && 'nodes' in c;
+export const isHead = (c: Community): c is HeadCluster => isHeadCluster(c) && !('clusterId' in c);
 export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
+
+type RNetworkArray = (Node | HeadCluster)[] | RNetworkArray[];
+export const nodes2Map = (cs: RNetworkArray, map?: NodeMap) => {
+  const cmap = map || new Map<string, Node | HeadCluster>();
+  cs.forEach((c: (Node | HeadCluster | RNetworkArray)) => {
+    if (Array.isArray(c)) {
+      nodes2Map(c, cmap);
+    } else {
+      cmap.set(c.id, c);
+    }
+  });
+  return cmap;
+};
 
 export const getLevelText = (level: number, maxLevel: number) => {
   const conditions: [boolean, string][] = [
@@ -45,37 +59,45 @@ export const getCommunityColor = (c: Community, index?: number) => {
   }
   return color;
 };
+/**
+ * 获得某个节点向上和向下查找的
+ * @param c 需要分析的中心节点
+ * @param dataMap 范围内节点的Map
+ */
 export const getRelatedCommunities = (
   c: Node | HeadCluster,
-  sourceData: LayerNetwork,
-  dataMap: Map<string, HeadCluster | Node>,
+  dataMap: NodeMap,
 ): (Node | HeadCluster
 )[] => {
   const relatedCommunities: (Node | HeadCluster)[] = [];
   // TODO 只考虑了向上查找的情况
-  if (isHeadCluster(c)) {
+  if (isHead(c)) {
     return [];
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  let prevCluster: HeadCluster | Cluster | Node = dataMap.get(c.clusterId)!;
+  let prevCluster: HeadCluster = (dataMap.get(c.clusterId) as HeadCluster);
+  relatedCommunities.push(prevCluster);
   while (isCluster(prevCluster)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    prevCluster = dataMap.get(prevCluster.clusterId)!;
+    prevCluster = (dataMap.get(prevCluster.clusterId) as Cluster);
     relatedCommunities.push(prevCluster);
   }
   return relatedCommunities;
 };
-type RNetworkArray = (Node | HeadCluster)[] | RNetworkArray[];
-export const getNetworkMap = (cs: RNetworkArray, map?: Map<string, Node | HeadCluster>) => {
-  const cmap = map || new Map<string, Node | HeadCluster>();
-  cs.forEach((c: (Node | HeadCluster | RNetworkArray)) => {
-    if (Array.isArray(c)) {
-      getNetworkMap(c, cmap);
-    } else {
-      cmap.set(c.id, c);
+export const getTargetCommunity = (
+  sourceTargetId: string,
+  displayNodeMap: NodeMap,
+  communityMap: NodeMap,
+) => {
+  const relatedCommunities = getRelatedCommunities(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    communityMap.get(sourceTargetId)!, communityMap,
+  );
+  for (let i = 0; i < relatedCommunities.length; i += 1) {
+    const relatedId = relatedCommunities[i].id;
+    if (displayNodeMap.has(relatedId)) {
+      return relatedId;
     }
-  });
-  return cmap;
+  }
+  return null;
 };
 
 export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {

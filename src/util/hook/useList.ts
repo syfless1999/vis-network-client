@@ -2,7 +2,7 @@ import {
   useState, useEffect, Dispatch, SetStateAction,
 } from 'react';
 
-function useList<T>(fetchApi: () => Promise<any[]>, deps: Array<any> = []): [
+function useList<T>(fetchApi: () => Promise<T[]>, deps: unknown[] = []): [
   list: T[],
   setList: Dispatch<SetStateAction<T[]>>,
   forceUpdate: () => void,

@@ -2,17 +2,21 @@ import React from 'react';
 import { GraphinContext } from '@antv/graphin';
 import { ContextMenu } from '@antv/graphin-components';
 import {
-  communityStyleWrapper, edgeStyleWrapper, getNetworkMap, isHeadCluster, getRelatedCommunities,
+  communityStyleWrapper,
+  edgeStyleWrapper,
+  nodes2Map,
+  isHeadCluster,
+  getTargetCommunity,
 } from 'src/util/network';
 import {
-  Community, DisplayNetwork, HeadCluster, Node, LayerNetwork, Edge,
+  Community, DisplayNetwork, LayerNetwork, Edge, NodeMap,
 } from 'src/type/network';
 import { deleteItemWithoutOrder } from 'src/util/array';
 
 interface NodeMenuProps {
   displayData: DisplayNetwork;
   sourceData: LayerNetwork;
-  communityMap: Map<string, Node | HeadCluster>;
+  communityMap: NodeMap;
   setDisplayData: (newDisplayData: DisplayNetwork) => void;
 }
 
@@ -39,71 +43,39 @@ const CustomMenu = (props: NodeMenuProps) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         displayNodes.push(communityStyleWrapper(communityMap.get(nodeId)!));
       });
-      const displayNodeMap = getNetworkMap(displayNodes);
+      const displayNodeMap = nodes2Map(displayNodes);
       // 2. 添加边
-      const { level } = model;
-      const { edges: levelEdges } = sourceData[level - 1];
       const displayEdges: Edge[] = [...edges];
-      //  21. 删除被扩展节点原先的边
-      const deletedEdges = deleteItemWithoutOrder(displayEdges,
+      //  21. 删除和model有关的边
+      deleteItemWithoutOrder(displayEdges,
         (edge) => edge.source === model.id || edge.target === model.id);
       //  22. 遍历被扩展层级所有的边，添加与新节点们有关的边
-      levelEdges.forEach((edge) => {
+      const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur.edges), []);
+      allEdges.forEach((edge) => {
         const { source, target } = edge;
         if (displayNodeMap.has(source) && displayNodeMap.has(target)) {
           // 221. 如果两个端点都在图上，则直接styled加入
           displayEdges.push(edgeStyleWrapper(edge));
-        } else if (displayNodeMap.has(source)) {
-          const newEdge: Edge = {
-            source,
-            target: '',
-          };
-          // 221. 如果其中一点不在图上，找到另一端的所有相关点，然后map到图上点加入
-          const relatedCommunities = getRelatedCommunities(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            communityMap.get(target)!,
-            sourceData,
-            communityMap,
-          );
-          const rcmap = getNetworkMap(relatedCommunities);
-          deletedEdges.forEach((edge) => {
-            if (rcmap.has(edge.target)) {
-              newEdge.target = edge.target;
-              displayEdges.push(edgeStyleWrapper(newEdge));
-              // TODO 添加边上的数额
-            } else if (rcmap.has(edge.source)) {
-              newEdge.target = edge.source;
-              // TODO 添加边上的数额
-              displayEdges.push(edgeStyleWrapper(newEdge));
-            }
-          });
+          return;
+        }
+        if (displayNodeMap.has(source)) {
+          const targetId = getTargetCommunity(target, displayNodeMap, communityMap);
+          if (targetId) {
+            displayEdges.push(edgeStyleWrapper({
+              source,
+              target: targetId,
+            }));
+          }
         } else if (displayNodeMap.has(target)) {
-          const newEdge: Edge = {
-            source: '',
-            target,
-          };
-          // 221. 如果其中一点不在图上，找到另一端的所有相关点，然后map到图上点加入
-          const relatedCommunities = getRelatedCommunities(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            communityMap.get(source)!,
-            sourceData,
-            communityMap,
-          );
-          const rcmap = getNetworkMap(relatedCommunities);
-          deletedEdges.forEach((edge) => {
-            if (rcmap.has(edge.target)) {
-              newEdge.source = edge.target;
-              displayEdges.push(edgeStyleWrapper(newEdge));
-              // TODO 添加边上的数额
-            } else if (rcmap.has(edge.source)) {
-              newEdge.source = edge.source;
-              // TODO 添加边上的数额
-              displayEdges.push(edgeStyleWrapper(newEdge));
-            }
-          });
+          const sourceId = getTargetCommunity(source, displayNodeMap, communityMap);
+          if (sourceId) {
+            displayEdges.push(edgeStyleWrapper({
+              source: sourceId,
+              target,
+            }));
+          }
         }
       });
-
       setDisplayData({
         ...displayData,
         nodes: displayNodes,

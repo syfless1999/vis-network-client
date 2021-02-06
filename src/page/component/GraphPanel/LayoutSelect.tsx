@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { Select } from 'antd';
+import { Edge } from 'src/type/network';
 
 const SelectOption = Select.Option;
 
@@ -12,9 +13,9 @@ export const layouts = [
     },
     animation: true,
     defSpringLen: (
-      _edge: any,
-      source: { data: { layout: { degree: any; }; }; },
-      target: { data: { layout: { degree: any; }; }; },
+      _edge: Edge,
+      source: { data: { layout: { degree: number; }; }; },
+      target: { data: { layout: { degree: number; }; }; },
     ) => {
       /** 默认返回的是 200 的弹簧长度 */
       /** 如果你要想要产生聚类的效果，可以考虑 根据边两边节点的度数来动态设置边的初始化长度：度数越小，则边越短 */

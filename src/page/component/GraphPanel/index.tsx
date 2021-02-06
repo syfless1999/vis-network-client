@@ -4,7 +4,7 @@ import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 
 import { DisplayNetwork, LayerNetwork } from 'src/type/network';
-import { getLevelText, getNetworkMap, networkStyleWrapper } from 'src/util/network';
+import { getLevelText, nodes2Map, networkStyleWrapper } from 'src/util/network';
 
 import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelect';
@@ -41,7 +41,7 @@ const GraphPanel = (props: GraphPanelProps) => {
   // memo: community map
   const communityMap = useMemo(() => {
     const nodes = sourceData.map((layer) => layer.nodes);
-    return getNetworkMap(nodes);
+    return nodes2Map(nodes);
   }, [sourceData]);
 
   useEffect(() => {
