@@ -1,15 +1,18 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { GraphinContext } from '@antv/graphin';
 import { ContextMenu } from '@antv/graphin-components';
 import {
   communityStyleWrapper,
-  edgeStyleWrapper,
   nodes2Map,
   isHeadCluster,
-  getTargetCommunity,
+  isHead,
+  isCluster,
+  isNode,
+  fillDisplayEdges,
 } from 'src/util/network';
 import {
-  Community, DisplayNetwork, LayerNetwork, Edge, NodeMap,
+  Community, DisplayNetwork, LayerNetwork, Edge, NodeMap, HeadCluster,
 } from 'src/type/network';
 import { deleteItemWithoutOrder } from 'src/util/array';
 
@@ -33,75 +36,86 @@ const CustomMenu = (props: NodeMenuProps) => {
 
   const handleExpand = () => {
     if (isHeadCluster(model)) {
+      const { nodes, edges } = displayData;
+      const displayNodes = [...nodes];
+      const displayEdges = [...edges];
       // 1. 添加节点
       //  11. 删除已有节点
-      const { nodes, edges } = displayData;
-      deleteItemWithoutOrder(nodes, (node) => node.id === model.id);
+      deleteItemWithoutOrder(displayNodes, (node) => node.id === model.id);
       //  12. 装饰并添加新节点
-      const displayNodes = [...nodes];
       model.nodes.forEach((nodeId) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        displayNodes.push(communityStyleWrapper(communityMap.get(nodeId)!));
+        if (communityMap.has(nodeId)) {
+          displayNodes.push(communityStyleWrapper(communityMap.get(nodeId)!));
+        }
       });
       const displayNodeMap = nodes2Map(displayNodes);
       // 2. 添加边
-      const displayEdges: Edge[] = [...edges];
       //  21. 删除和model有关的边
       deleteItemWithoutOrder(displayEdges,
         (edge) => edge.source === model.id || edge.target === model.id);
-      //  22. 遍历被扩展层级所有的边，添加与新节点们有关的边
+      //  22. 加边：遍历被扩展层级所有的边，添加与新节点们有关的边
       const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur.edges), []);
-      allEdges.forEach((edge) => {
-        const { source, target } = edge;
-        if (displayNodeMap.has(source) && displayNodeMap.has(target)) {
-          // 221. 如果两个端点都在图上，则直接styled加入
-          displayEdges.push(edgeStyleWrapper(edge));
-          return;
-        }
-        if (displayNodeMap.has(source)) {
-          const targetId = getTargetCommunity(target, displayNodeMap, communityMap);
-          if (targetId) {
-            displayEdges.push(edgeStyleWrapper({
-              source,
-              target: targetId,
-            }));
-          }
-        } else if (displayNodeMap.has(target)) {
-          const sourceId = getTargetCommunity(source, displayNodeMap, communityMap);
-          if (sourceId) {
-            displayEdges.push(edgeStyleWrapper({
-              source: sourceId,
-              target,
-            }));
-          }
-        }
-      });
+      fillDisplayEdges(
+        displayEdges,
+        allEdges,
+        displayNodeMap,
+        communityMap,
+      );
       setDisplayData({
-        ...displayData,
         nodes: displayNodes,
         edges: displayEdges,
       });
     }
   };
   const handleShrink = () => {
-    // TODO
+    if (isCluster(model) || isNode(model)) {
+      const { nodes, edges } = displayData;
+      const displayNodes = [...nodes];
+      const displayEdges = [...edges];
+      // 1. 点: 删同级点 / 加cluster
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const clusterNode = communityMap.get(model.clusterId)!;
+      const { nodes: sameLevelNodeIds } = clusterNode as HeadCluster;
+      //  11. 加点
+      displayNodes.push(communityStyleWrapper(clusterNode));
+      const sameLevelNodeMap = nodes2Map(
+        sameLevelNodeIds.map((nodeId) => communityMap.get(nodeId)!),
+      );
+      //  12. 删点
+      deleteItemWithoutOrder(
+        displayNodes,
+        (node) => sameLevelNodeMap.has(node.id),
+      );
+      const displayNodeMap = nodes2Map(displayNodes);
+      // 2. 边: 删原来的点的边 / 加新点的边
+      //  21. 删边
+      deleteItemWithoutOrder(
+        edges,
+        (edge) => sameLevelNodeMap.has(edge.source) || sameLevelNodeMap.has(edge.target),
+      );
+      //  22. 加边
+      const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur.edges), []);
+      fillDisplayEdges(
+        edges,
+        allEdges,
+        displayNodeMap,
+        communityMap,
+      );
+      setDisplayData({
+        nodes: displayNodes,
+        edges: displayEdges,
+      });
+    }
   };
   const handleHide = () => {
     graph.remove(model.id);
   };
 
-  if (isHeadCluster(model)) {
-    return (
-      <Menu bindType="node">
-        <Menu.Item onClick={handleExpand}>Expand</Menu.Item>
-        <Menu.Item onClick={handleHide}>Hide</Menu.Item>
-      </Menu>
-    );
-  }
   return (
     <Menu bindType="node">
-      <Menu.Item onClick={handleShrink}>ShrinkCluster</Menu.Item>
-      <Menu.Item>Hide</Menu.Item>
+      {isHeadCluster(model) ? <Menu.Item onClick={handleExpand}>Expand</Menu.Item> : <></>}
+      {!isHead(model) ? <Menu.Item onClick={handleShrink}>ShrinkCluster</Menu.Item> : <></>}
+      <Menu.Item onClick={handleHide}>Hide</Menu.Item>
     </Menu>
   );
 };

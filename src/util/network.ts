@@ -218,3 +218,33 @@ export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
     edges: styledEdges,
   };
 };
+
+export const fillDisplayEdges = (
+  nowEdges: Edge[],
+  sourceEdges: Edge[],
+  displayNodeMap: NodeMap,
+  sourceNodeMap: NodeMap,
+) => {
+  sourceEdges.forEach((edge) => {
+    const { source, target } = edge;
+    if (displayNodeMap.has(source) && displayNodeMap.has(target)) {
+      nowEdges.push(edgeStyleWrapper(edge));
+    } else if (displayNodeMap.has(source)) {
+      const targetId = getTargetCommunity(target, displayNodeMap, sourceNodeMap);
+      if (targetId) {
+        nowEdges.push(edgeStyleWrapper({
+          source,
+          target: targetId,
+        }));
+      }
+    } else if (displayNodeMap.has(target)) {
+      const sourceId = getTargetCommunity(source, displayNodeMap, sourceNodeMap);
+      if (sourceId) {
+        nowEdges.push(edgeStyleWrapper({
+          source: sourceId,
+          target,
+        }));
+      }
+    }
+  });
+};
