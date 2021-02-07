@@ -9,11 +9,22 @@ import { TaskClusterType } from 'src/model/task';
 import { getDataSourceList } from 'src/service/datasource';
 import useList from 'src/util/hook/useList';
 
+export interface AddTaskParams {
+  dataSourceId: string;
+  updateCycle: number;
+  clusterType: TaskClusterType;
+  paramWeight?: number;
+  topologyWeight?: number;
+  needCustomizeSimilarityApi: boolean;
+  similarityApi?: string;
+  [paramKey: string]: unknown;
+}
+
 const { Option } = Select;
 
 const AddTaskDrawer = (props: {
   visible: boolean,
-  handleSubmit: (values: any) => void,
+  handleSubmit: (values: AddTaskParams) => void,
   handleCancel: () => void,
 }) => {
   const { visible, handleSubmit, handleCancel } = props;
@@ -27,7 +38,7 @@ const AddTaskDrawer = (props: {
   const formInstance = useRef<FormInstance>(null);
   const handleDataSourceChange = (value: string) => {
     // eslint-disable-next-line no-underscore-dangle
-    const ds = (dsList as DataSource[]).find((ds) => ds._id === value);
+    const ds = (dsList).find((ds) => ds._id === value);
     if (ds) {
       setParamSet(ds.node.param);
     }
@@ -75,7 +86,7 @@ const AddTaskDrawer = (props: {
                 onChange={handleDataSourceChange}
                 placeholder="Select a option and change input text above"
               >
-                {(dsList as DataSource[]).map(
+                {(dsList).map(
                   // eslint-disable-next-line no-underscore-dangle
                   (ds) => (<Option value={ds._id} key={ds._id}>{ds.name}</Option>),
                 )}

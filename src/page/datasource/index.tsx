@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import DataSource from 'src/model/datasource';
 import useDataSourceList from 'src/util/hook/useDataSourceList';
 import SearchAndAddBar from 'src/page/component/SearchAndAddBar';
-import { createDataSource, CreateDataSourceParams } from 'src/service/datasource';
-import AddDataSourceDrawer from './AddDataSourceDrawer';
+import { createDataSource } from 'src/service/datasource';
+import AddDataSourceDrawer, { AddDataSourceParam } from './AddDataSourceDrawer';
 import DataSourceList from './DataSourceList';
 
 const DataSourcePanel = () => {
@@ -15,7 +14,7 @@ const DataSourcePanel = () => {
     [drawerVisible],
   );
 
-  const handleAddSubmit = (values: any) => {
+  const handleAddSubmit = (values: AddDataSourceParam) => {
     const params = {
       ...values,
       expandSource: {
@@ -23,7 +22,7 @@ const DataSourcePanel = () => {
         updateCycle: values.updateCycle,
       },
     };
-    createDataSource(params as CreateDataSourceParams)
+    createDataSource(params)
       .then(() => {
         changeDrawerVisible();
       });
@@ -32,7 +31,7 @@ const DataSourcePanel = () => {
   return (
     <div>
       <SearchAndAddBar title="Data Source List" handleClick={changeDrawerVisible} />
-      <DataSourceList dataSource={list as Array<DataSource>} />
+      <DataSourceList dataSource={list} />
       <AddDataSourceDrawer
         visible={drawerVisible}
         handleCancel={changeDrawerVisible}

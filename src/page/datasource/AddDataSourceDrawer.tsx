@@ -5,11 +5,22 @@ import { FormInstance } from 'antd/lib/form';
 import React, { useRef, useState } from 'react';
 import { DataScale } from 'src/model/datasource';
 
+export interface AddDataSourceParam {
+  name: string;
+  url: string;
+  nodeParam: string;
+  edgeParam: string;
+  scale: DataScale;
+  needExpand: boolean;
+  expandSourceUrl: string;
+  updateCycle: number;
+}
+
 const { Option } = Select;
 
 const AddDataSourceDrawer = (props: {
   visible: boolean,
-  handleSubmit: (values: any) => void,
+  handleSubmit: (values: AddDataSourceParam) => void,
   handleCancel: () => void,
 }) => {
   const { visible, handleSubmit, handleCancel } = props;

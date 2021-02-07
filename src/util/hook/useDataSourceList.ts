@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import useWebsocket from 'src/util/hook/useWebsocket';
 import DataSource from 'src/model/datasource';
 
-const useDataSourceList = () => {
+const useDataSourceList = (): [
+  DataSource[],
+  React.Dispatch<React.SetStateAction<DataSource[]>>,
+] => {
   const socket = useWebsocket('http://127.0.0.1:5000/datasource');
   const [list, setList] = useState<Array<DataSource>>([]);
 
