@@ -219,6 +219,13 @@ export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
   };
 };
 
+/**
+ * 为当前图补充连边（无状态）
+ * @param nowEdges 目前图上的边合集，补充完的边会直接挂载到这个数组中
+ * @param sourceEdges 原始边的来源集
+ * @param displayNodeMap 目前图上的节点Map
+ * @param sourceNodeMap 原始点的来源Map
+ */
 export const fillDisplayEdges = (
   nowEdges: Edge[],
   sourceEdges: Edge[],
