@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import useDataSourceList from 'src/util/hook/useDataSourceList';
 import SearchAndAddBar from 'src/page/component/SearchAndAddBar';
-import { createDataSource } from 'src/service/datasource';
+import { createDataSource, getDataSourceList } from 'src/service/datasource';
 import AddDataSourceDrawer, { AddDataSourceParam } from './AddDataSourceDrawer';
 import DataSourceList from './DataSourceList';
 
 const DataSourcePanel = () => {
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
-  const [list] = useDataSourceList();
+  const [list, setList] = useDataSourceList();
 
   const changeDrawerVisible = useCallback(
     () => setDrawerVisible(!drawerVisible),
@@ -23,8 +23,10 @@ const DataSourcePanel = () => {
       },
     };
     createDataSource(params)
-      .then(() => {
+      .then(async () => {
         changeDrawerVisible();
+        const dsList = await getDataSourceList();
+        setList(dsList);
       });
   };
 
