@@ -3,7 +3,7 @@ import {
   Table, Tag, Badge, Progress, Switch,
 } from 'antd';
 import styled from 'styled-components';
-import DataSource, { EdgeFeature, NodeFeature } from 'src/model/datasource';
+import DataSource, { EdgeProperty, NodeProperty } from 'src/model/datasource';
 import { getRandomColor } from 'src/util/color/dataSourceColor';
 import { numberSimplify } from 'src/util/number';
 
@@ -27,10 +27,10 @@ function DataSourceList(props: { dataSource: Array<DataSource> }) {
         key="node"
         dataIndex="node"
         title="node count / param"
-        render={(nodeFeature: NodeFeature) => (
+        render={(nodeProperty: NodeProperty) => (
           <>
-            <SBadge overflowCount={999} count={numberSimplify(nodeFeature.current)} />
-            {nodeFeature.param && nodeFeature.param.map(
+            <SBadge overflowCount={999} count={numberSimplify(nodeProperty.current)} />
+            {nodeProperty.param && nodeProperty.param.map(
               (p) => (
                 <Tag key={p} color={getRandomColor()}>{p}</Tag>
               ),
@@ -42,10 +42,10 @@ function DataSourceList(props: { dataSource: Array<DataSource> }) {
         key="edge"
         dataIndex="edge"
         title="edge count / param"
-        render={(edgeFeature: EdgeFeature) => (
+        render={(edgeProperty: EdgeProperty) => (
           <>
-            <SBadge overflowCount={999} count={numberSimplify(edgeFeature.current)} />
-            {edgeFeature.param && edgeFeature.param.map(
+            <SBadge overflowCount={999} count={numberSimplify(edgeProperty.current)} />
+            {edgeProperty.param && edgeProperty.param.map(
               (p) => (
                 <Tag key={p} color={getRandomColor()}>{p}</Tag>
               ),
