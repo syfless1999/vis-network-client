@@ -29,7 +29,7 @@ function DataSourceList(props: { list: Array<Task> }) {
             title={progress < 100 ? 'Active' : 'Finished'}
             value={progress}
             precision={1}
-            valueStyle={{ color: progress < 100 ? '#3f8600' : '#cf1322' }}
+            valueStyle={{ color: progress < 100 ? '#cf1322' : '#3f8600' }}
             suffix="%"
           />
         )}
