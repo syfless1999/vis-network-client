@@ -31,7 +31,7 @@ export type Layer<T extends Node | HeadCluster> = {
   nodes: T[];
   edges: (T extends HeadCluster ? ClusterEdge : Edge)[];
 }
-export type LayerNetwork = (Layer<HeadCluster | Node>)[];
+export type LayerNetwork = (Layer<HeadCluster | Node> | undefined)[];
 
 // front-end data
 export interface DisplayNetwork {

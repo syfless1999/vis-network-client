@@ -1,5 +1,8 @@
 import React from 'react';
-import { Table, Statistic, Typography } from 'antd';
+import {
+  Table, Statistic, Typography, Button,
+} from 'antd';
+import { useHistory } from 'react-router-dom';
 import Task from 'src/model/task';
 
 const { Title } = Typography;
@@ -7,6 +10,10 @@ const { Column } = Table;
 
 function DataSourceList(props: { list: Array<Task> }) {
   const { list } = props;
+  const history = useHistory();
+  const handleTaskResultView = (taskId: string) => {
+    history.push(`/network/${taskId}`);
+  };
   return (
     <Table rowKey="_id" dataSource={list}>
       <Column
@@ -33,6 +40,12 @@ function DataSourceList(props: { list: Array<Task> }) {
             suffix="%"
           />
         )}
+      />
+      <Column
+        title="result"
+        dataIndex="_id"
+        key="result"
+        render={(_id) => <Button type="primary" onClick={() => handleTaskResultView(_id)}>view</Button>}
       />
     </Table>
   );

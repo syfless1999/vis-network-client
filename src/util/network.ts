@@ -1,5 +1,5 @@
 import {
-  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, Node, NodeMap,
+  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
 import { colorSets, colorMap } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from './color/hexToRgba';
@@ -106,7 +106,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
   const fSize = kSize / 1.6;
   const bSize = cSize * badgeSize;
   const cColor = color || getCommunityColor(c);
-  const { id, nodes: { length } } = c;
+  const { nodeNum } = c;
   const sc = {
     ...c,
     style: {
@@ -116,10 +116,6 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
         stroke: cColor,
         size: [kSize, kSize],
       },
-      label: {
-        value: `cluster-${id}`,
-        fill: hexToRgbaToHex('#000', 0.85),
-      },
       halo: {
         fill: hexToRgbaToHex(cColor, 0.1),
         strokeWidth: 1.2,
@@ -128,7 +124,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
       icon: {
         fontFamily: 'graphin',
         type: 'font',
-        value: id,
+        value: nodeNum,
         fill: cColor,
         size: fSize,
       },
@@ -136,7 +132,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
         {
           position: 'RT',
           type: 'text',
-          value: length,
+          value: nodeNum,
           size: [bSize, bSize],
           fill: cColor,
           stroke: cColor,
@@ -184,20 +180,21 @@ export const communityStyleWrapper = (n: Node | HeadCluster, color?: string) => 
   }
   return nodeStyleWrapper(n, color);
 };
-export const edgeStyleWrapper = (e: Edge) => {
-  const se = {
-    ...e,
-    style: {
-      label: {},
-    },
-  };
-  if (isClusterEdge(e)) {
-    se.style.label = {
+export const normalEdgeStyleWrapper = (e: Edge) => e;
+export const clusterEdgeStyleWrapper = (e: ClusterEdge) => ({
+  ...e,
+  style: {
+    label: {
       value: `${e.count}`,
       fontSize: 12,
-    };
+    },
+  },
+});
+export const edgeStyleWrapper = (e: Edge) => {
+  if (isClusterEdge(e)) {
+    return clusterEdgeStyleWrapper(e);
   }
-  return se;
+  return normalEdgeStyleWrapper(e);
 };
 export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
   const { nodes, edges } = c;
@@ -254,4 +251,28 @@ export const fillDisplayEdges = (
       }
     }
   });
+};
+/**
+ * merge two layer-network, fill layer in 'undefined'
+ * @param oldLn first layer-network
+ * @param newLn second layer-network
+ */
+export const mergeTwoLayerNetwork = (oldLn: LayerNetwork, newLn: LayerNetwork): LayerNetwork => {
+  if (oldLn.length < newLn.length) {
+    throw new Error('Two layer-networks has different length');
+  }
+  const res: LayerNetwork = Array.from({ length: oldLn.length });
+  for (let i = 0; i < oldLn.length; i += 1) {
+    const layer1 = oldLn[i];
+    const layer2 = newLn[i];
+    if (layer1 && layer2) {
+      res[i] = {
+        nodes: layer1.nodes.concat(layer2.nodes),
+        edges: layer1.edges.concat(layer2.edges),
+      };
+    } else {
+      res[i] = layer1 || layer2;
+    }
+  }
+  return res;
 };

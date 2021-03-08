@@ -3,17 +3,20 @@ import Graphin, { Behaviors } from '@antv/graphin';
 import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 
-import { DisplayNetwork, LayerNetwork } from 'src/type/network';
+import {
+  DisplayNetwork, HeadCluster, LayerNetwork, Node,
+} from 'src/type/network';
 import { getLevelText, nodes2Map, networkStyleWrapper } from 'src/util/network';
 
 import Toolbar from './Toolbar';
-import LayoutSelector, { layouts } from './LayoutSelect';
+import LayoutSelector, { layouts } from './LayoutSelector';
 
 import '@antv/graphin/dist/index.css';
 import NodeMenu from './NodeMenu';
 
 interface GraphPanelProps {
   sourceData: LayerNetwork;
+  expandSourceDataByLevel: (level: number) => Promise<LayerNetwork>;
 }
 
 const {
@@ -23,7 +26,7 @@ const { Option: SelectOption } = Select;
 
 const GraphPanel = (props: GraphPanelProps) => {
   // props
-  const { sourceData } = props;
+  const { sourceData, expandSourceDataByLevel } = props;
   const maxLevel = sourceData.length - 1;
 
   // state: layout
@@ -38,22 +41,40 @@ const GraphPanel = (props: GraphPanelProps) => {
   };
   // state: display data
   const [displayData, setDisplayData] = useState<DisplayNetwork>({ nodes: [], edges: [] });
+
   // memo: community map
   const communityMap = useMemo(() => {
-    const nodes = sourceData.map((layer) => layer.nodes);
+    const nodes: (Node | HeadCluster)[] = [];
+    sourceData.forEach((layer) => {
+      if (layer) {
+        nodes.push(...layer.nodes);
+      }
+    });
     return nodes2Map(nodes);
   }, [sourceData]);
 
   useEffect(() => {
     setLevel(maxLevel);
-  }, [sourceData]);
+  }, [sourceData.length]);
+
   useEffect(() => {
+    async function setDisplayDataAsync() {
+      if (!sourceData[level]) {
+        const newLayerNetwork = await expandSourceDataByLevel(level);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        setDisplayData(networkStyleWrapper(newLayerNetwork[level]!));
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        setDisplayData(networkStyleWrapper(sourceData[level]!));
+      }
+    }
     if (level >= 0) {
-      setDisplayData(networkStyleWrapper(sourceData[level]));
+      setDisplayDataAsync();
     }
   }, [level]);
 
   const layoutType = layouts.find((l) => l.type === layout);
+
   return (
     <Graphin
       data={displayData}

@@ -5,7 +5,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.3.0",
     "@antv/g6": "^4.1.13",
-    "@antv/graphin": "^2.0.2",
+    "@antv/graphin": "2.0.3",
     "@antv/graphin-components": "^2.0.0",
     "antd": "^4.9.4",
     "react": "^17.0.1",

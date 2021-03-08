@@ -20,7 +20,6 @@ const Toolbar = () => {
       id: 'zoomIn',
       icon: <ZoomInOutlined />,
       action: () => {
-        // API BUG: 这里反了
         handleZoomOut();
       },
     },

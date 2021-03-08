@@ -3,9 +3,13 @@ import { Switch, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { Layout } from 'antd';
 
-import routers from 'src/config/router';
 import Header from 'src/page/layout/Header';
 import Footer from 'src/page/layout/Footer';
+
+import DataSource from 'src/page/datasource';
+import Task from 'src/page/task';
+import Network from 'src/page/network';
+import SingleNetwork from 'src/page/network/Network';
 
 import 'src/app.less';
 
@@ -25,14 +29,11 @@ const Container = styled.div`
 function App() {
   const Router = () => (
     <Switch>
-      {routers.map((item) => (
-        <Route key={item.key} path={item.url}>
-          {item.component}
-        </Route>
-      ))}
-      <Route path="/">
-        <h1>home</h1>
-      </Route>
+      <Route path="/datasource"><DataSource /></Route>
+      <Route path="/task"><Task /></Route>
+      <Route path="/network/:taskId"><SingleNetwork /></Route>
+      <Route path="/network"><Network /></Route>
+      <Route path="/"><h1>home</h1></Route>
     </Switch>
   );
   return (

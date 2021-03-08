@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Layout, Menu } from 'antd';
-import routers from 'src/config/router';
 
 const { Header } = Layout;
 const Container = styled(Header)`
@@ -18,16 +17,10 @@ const MyHeader = () => {
   return (
     <Container>
       <Menu theme="light" mode="horizontal" selectedKeys={[pathname]}>
-        <Menu.Item key="home">
-          <Link to="/">Home</Link>
-        </Menu.Item>
-        {routers.map((item) => (
-          <Menu.Item key={item.key}>
-            <Link to={item.url}>
-              {item.text}
-            </Link>
-          </Menu.Item>
-        ))}
+        <Menu.Item><Link to="/">Home</Link></Menu.Item>
+        <Menu.Item><Link to="/datasource">Datasource</Link></Menu.Item>
+        <Menu.Item><Link to="/task">Task</Link></Menu.Item>
+        <Menu.Item><Link to="/network">Network</Link></Menu.Item>
       </Menu>
     </Container>
   );

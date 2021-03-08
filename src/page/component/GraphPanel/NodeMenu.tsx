@@ -53,7 +53,7 @@ const CustomMenu = (props: NodeMenuProps) => {
       deleteItemWithoutOrder(displayEdges,
         (edge) => edge.source === model.id || edge.target === model.id);
       // 22. 加边：遍历被扩展层级所有的边，添加与新节点们有关的边
-      const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur.edges), []);
+      const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur!.edges), []);
       fillDisplayEdges(
         displayEdges,
         allEdges,
@@ -95,7 +95,7 @@ const CustomMenu = (props: NodeMenuProps) => {
         (edge) => sameLevelNodeMap.has(edge.source) || sameLevelNodeMap.has(edge.target),
       );
       // 22. 加边
-      const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur.edges), []);
+      const allEdges = sourceData.reduce((prev: Edge[], cur) => prev.concat(cur!.edges), []);
       fillDisplayEdges(
         displayEdges,
         allEdges,

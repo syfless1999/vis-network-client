@@ -1,22 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import GraphPanel from 'src/page/component/GraphPanel';
-import { getLayerNetworkData } from 'src/service/network';
-import { LayerNetwork } from 'src/type/network';
+import React from 'react';
 
-const Network = () => {
-  const [sourceData, setSourceData] = useState<LayerNetwork>([]);
-  useEffect(() => {
-    async function fetchData() {
-      const data = await getLayerNetworkData();
-      setSourceData(data);
-    }
-    fetchData();
-  }, []);
+export default function index() {
   return (
     <div>
-      <GraphPanel sourceData={sourceData} />
+      network
     </div>
   );
-};
-
-export default Network;
+}
