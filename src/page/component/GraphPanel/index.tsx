@@ -18,6 +18,11 @@ interface GraphPanelProps {
   sourceData: LayerNetwork;
   expandSourceDataByLevel: (level: number) => Promise<LayerNetwork>;
 }
+interface GraphPanelState {
+  layout: string;
+  level: number;
+  displayData: DisplayNetwork;
+}
 
 const {
   ZoomCanvas, FitView, ActivateRelations,
@@ -29,18 +34,13 @@ const GraphPanel = (props: GraphPanelProps) => {
   const { sourceData, expandSourceDataByLevel } = props;
   const maxLevel = sourceData.length - 1;
 
-  // state: layout
-  const [layout, setLayout] = useState('graphin-force');
-  const handleChangeLayout = (value: string) => setLayout(value);
-  // state: cluster level
-  const [level, setLevel] = useState<number>(maxLevel);
-  const handleLevelChange = (value: number) => {
-    if (value >= 0 && value <= maxLevel) {
-      setLevel(value);
-    }
-  };
-  // state: display data
-  const [displayData, setDisplayData] = useState<DisplayNetwork>({ nodes: [], edges: [] });
+  // state
+  const [state, setState] = useState<GraphPanelState>({
+    layout: 'graphin-force',
+    level: maxLevel,
+    displayData: { nodes: [], edges: [] },
+  });
+  const { layout, level, displayData } = state;
 
   // memo: community map
   const communityMap = useMemo(() => {
@@ -53,27 +53,50 @@ const GraphPanel = (props: GraphPanelProps) => {
     return nodes2Map(nodes);
   }, [sourceData]);
 
-  useEffect(() => {
-    setLevel(maxLevel);
-  }, [sourceData.length]);
+  // memo: layout type
+  const layoutType = useMemo(() => layouts.find((l) => l.type === layout), [layout]);
 
-  useEffect(() => {
-    async function setDisplayDataAsync() {
-      if (!sourceData[level]) {
-        const newLayerNetwork = await expandSourceDataByLevel(level);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        setDisplayData(networkStyleWrapper(newLayerNetwork[level]!));
+  const handleChangeLayout = (value: string) => setState((prev) => ({
+    ...prev,
+    layout: value,
+  }));
+  const handleLevelChange = async (value: number) => {
+    if (value >= 0 && value <= maxLevel) {
+      const sourceLayer = sourceData[value];
+      if (!sourceLayer) {
+        const newLayerNetwork = await expandSourceDataByLevel(value);
+        const targetLayer = newLayerNetwork[value];
+        if (targetLayer) {
+          setState((prev) => ({
+            ...prev,
+            displayData: networkStyleWrapper(targetLayer),
+            level: value,
+          }));
+        }
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        setDisplayData(networkStyleWrapper(sourceData[level]!));
+        setState((prev) => ({
+          ...prev,
+          displayData: networkStyleWrapper(sourceLayer),
+          level: value,
+        }));
       }
     }
-    if (level >= 0) {
-      setDisplayDataAsync();
-    }
-  }, [level]);
+  };
+  const handleDisplayDataChange = (newDisplayData: DisplayNetwork) => {
+    setState((prev) => ({
+      ...prev,
+      displayData: newDisplayData,
+    }));
+  };
 
-  const layoutType = layouts.find((l) => l.type === layout);
+  useEffect(() => {
+    const currentData = sourceData[maxLevel];
+    setState((prev) => ({
+      ...prev,
+      level: maxLevel,
+      displayData: currentData ? networkStyleWrapper(currentData) : prev.displayData,
+    }));
+  }, [sourceData.length]);
 
   return (
     <Graphin
@@ -85,7 +108,7 @@ const GraphPanel = (props: GraphPanelProps) => {
         <NodeMenu
           sourceData={sourceData}
           displayData={displayData}
-          setDisplayData={setDisplayData}
+          setDisplayData={handleDisplayDataChange}
           communityMap={communityMap}
         />
       </ContextMenu>
