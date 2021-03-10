@@ -36,7 +36,7 @@ const GraphPanel = (props: GraphPanelProps) => {
 
   // state
   const [state, setState] = useState<GraphPanelState>({
-    layout: 'graphin-force',
+    layout: 'circular',
     level: maxLevel,
     displayData: { nodes: [], edges: [] },
   });
