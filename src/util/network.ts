@@ -44,7 +44,7 @@ export const getLevelText = (level: number, maxLevel: number) => {
   return res;
 };
 export const getClusterDisplaySize = (c: HeadCluster) => {
-  const cSize = c.nodeNum;
+  const cSize = c.count;
   return Math.min((cSize / sizeUnit + 1), 5);
 };
 export const getCommunityColor = (c: Community, index?: number) => {
