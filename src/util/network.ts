@@ -106,7 +106,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
   const fSize = kSize / 1.6;
   const bSize = cSize * badgeSize;
   const cColor = color || getCommunityColor(c);
-  const { nodeNum } = c;
+  const { count } = c;
   const sc = {
     ...c,
     style: {
@@ -124,7 +124,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
       icon: {
         fontFamily: 'graphin',
         type: 'font',
-        value: nodeNum,
+        value: count,
         fill: cColor,
         size: fSize,
       },
@@ -132,7 +132,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
         {
           position: 'RT',
           type: 'text',
-          value: nodeNum,
+          value: count,
           size: [bSize, bSize],
           fill: cColor,
           stroke: cColor,
