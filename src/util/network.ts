@@ -1,8 +1,9 @@
 import {
-  Cluster, ClusterEdge, Community, Edge, HeadCluster, Layer, LayerNetwork, Node, NodeMap,
+  Cluster, ClusterEdge, Community, Edge, EdgeMap, HeadCluster, Layer, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
 import { colorSets, colorMap } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from './color/hexToRgba';
+import { getJoinString } from './string';
 
 // constant
 const keyshapeSize = 20;
@@ -26,6 +27,14 @@ export const nodes2Map = (cs: RNetworkArray, map?: NodeMap) => {
     }
   });
   return cmap;
+};
+export const edges2Map = (es: Edge[], map?: EdgeMap) => {
+  const emap = map || new Map<string, Edge>();
+  es.forEach((e) => {
+    const key = getJoinString(e.source, e.target);
+    emap.set(key, e);
+  });
+  return emap;
 };
 
 export const getLevelText = (level: number, maxLevel: number) => {
@@ -67,29 +76,28 @@ export const getCommunityColor = (c: Community, index?: number) => {
 export const getRelatedCommunities = (
   c: Node | HeadCluster,
   dataMap: NodeMap,
-): (Node | HeadCluster
-)[] => {
+): Array<Node | HeadCluster> => {
   const relatedCommunities: (Node | HeadCluster)[] = [];
   // TODO 只考虑了向上查找的情况
-  if (isHead(c)) {
-    return [];
-  }
-  let prevCluster: HeadCluster = (dataMap.get(c.clusterId) as HeadCluster);
-  relatedCommunities.push(prevCluster);
-  while (isCluster(prevCluster)) {
-    prevCluster = (dataMap.get(prevCluster.clusterId) as Cluster);
-    relatedCommunities.push(prevCluster);
+  let cluster: Node | HeadCluster | undefined = c;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  while (isCluster(cluster!)) {
+    cluster = dataMap.get(cluster.clusterId);
+    if (!cluster) {
+      break;
+    }
+    relatedCommunities.push(cluster);
   }
   return relatedCommunities;
 };
 export const getTargetCommunity = (
-  sourceTargetId: string,
+  targetId: string,
   displayNodeMap: NodeMap,
   communityMap: NodeMap,
 ) => {
   const relatedCommunities = getRelatedCommunities(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    communityMap.get(sourceTargetId)!, communityMap,
+    communityMap.get(targetId)!, communityMap,
   );
   for (let i = 0; i < relatedCommunities.length; i += 1) {
     const relatedId = relatedCommunities[i].id;
@@ -124,7 +132,7 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
       icon: {
         fontFamily: 'graphin',
         type: 'font',
-        value: count,
+        value: c.id,
         fill: cColor,
         size: fSize,
       },
@@ -225,29 +233,39 @@ export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
  */
 export const fillDisplayEdges = (
   nowEdges: Edge[],
+  nowEdgesMap: EdgeMap,
   sourceEdges: Edge[],
   displayNodeMap: NodeMap,
   sourceNodeMap: NodeMap,
 ) => {
+  const addEdge = (source: string, target: string, edge: Edge) => {
+    const edgeId = getJoinString(source, target);
+    if (nowEdgesMap.has(edgeId)) {
+      return;
+    }
+    const styledEdge = edgeStyleWrapper(edge);
+    nowEdgesMap.set(edgeId, styledEdge);
+    nowEdges.push(styledEdge);
+  };
   sourceEdges.forEach((edge) => {
     const { source, target } = edge;
     if (displayNodeMap.has(source) && displayNodeMap.has(target)) {
-      nowEdges.push(edgeStyleWrapper(edge));
+      addEdge(source, target, edge);
     } else if (displayNodeMap.has(source)) {
       const targetId = getTargetCommunity(target, displayNodeMap, sourceNodeMap);
       if (targetId) {
-        nowEdges.push(edgeStyleWrapper({
+        addEdge(source, targetId, {
           source,
           target: targetId,
-        }));
+        });
       }
     } else if (displayNodeMap.has(target)) {
       const sourceId = getTargetCommunity(source, displayNodeMap, sourceNodeMap);
       if (sourceId) {
-        nowEdges.push(edgeStyleWrapper({
+        addEdge(sourceId, target, {
           source: sourceId,
           target,
-        }));
+        });
       }
     }
   });

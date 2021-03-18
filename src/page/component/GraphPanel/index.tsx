@@ -4,9 +4,11 @@ import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 
 import {
-  DisplayNetwork, HeadCluster, LayerNetwork, Node,
+  DisplayNetwork, Edge, HeadCluster, LayerNetwork, Node,
 } from 'src/type/network';
-import { getLevelText, nodes2Map, networkStyleWrapper } from 'src/util/network';
+import {
+  getLevelText, nodes2Map, networkStyleWrapper, edges2Map,
+} from 'src/util/network';
 
 import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelector';
@@ -44,13 +46,23 @@ const GraphPanel = (props: GraphPanelProps) => {
 
   // memo: community map
   const communityMap = useMemo(() => {
-    const nodes: (Node | HeadCluster)[] = [];
-    sourceData.forEach((layer) => {
-      if (layer) {
-        nodes.push(...layer.nodes);
+    const nodes = sourceData.reduce((all: (HeadCluster | Node)[], cur) => {
+      if (cur) {
+        return all.concat(cur.nodes);
       }
-    });
+      return all;
+    }, []);
     return nodes2Map(nodes);
+  }, [sourceData]);
+
+  const edgeMap = useMemo(() => {
+    const edges = sourceData.reduce((all: Edge[], cur) => {
+      if (cur) {
+        return all.concat(cur.edges);
+      }
+      return all;
+    }, []);
+    return edges2Map(edges);
   }, [sourceData]);
 
   // memo: layout type
@@ -110,6 +122,7 @@ const GraphPanel = (props: GraphPanelProps) => {
           displayData={displayData}
           setDisplayData={handleDisplayDataChange}
           communityMap={communityMap}
+          edgeMap={edgeMap}
         />
       </ContextMenu>
       {/* 滚轮放大缩小：关闭 */}
