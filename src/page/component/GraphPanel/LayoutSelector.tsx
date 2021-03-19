@@ -63,12 +63,12 @@ export const layouts = [
   },
 ];
 
-type LayoutSelectorProps = {
+interface LayoutSelectorProps {
   value: string,
   onChange: (value: string) => void,
 }
 
-const LayoutSelector = (props: LayoutSelectorProps) => {
+const LayoutSelector: React.FC<LayoutSelectorProps> = (props) => {
   const { value, onChange } = props;
   // 包裹在graphin内部的组件，将获得graphin提供的额外props
 

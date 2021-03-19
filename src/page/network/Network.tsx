@@ -35,7 +35,7 @@ const Network = () => {
     <div>
       <TaskIdContext.Provider value={taskId}>
         <GraphPanel
-          async={false}
+          async
           sourceData={sourceData}
           expandSourceDataByLevel={expandSourceDataByLevel}
         />

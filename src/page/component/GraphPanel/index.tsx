@@ -3,16 +3,15 @@ import Graphin, { Behaviors, Utils } from '@antv/graphin';
 import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 
-import {
-  DisplayNetwork, HeadCluster, LayerNetwork, Node,
-} from 'src/type/network';
-import { getLevelText, nodes2Map, networkStyleWrapper } from 'src/util/network';
+import { DisplayNetwork, LayerNetwork, Node } from 'src/type/network';
+import { getDisplayLevelText, nodes2Map, networkStyleWrapper } from 'src/util/network';
 
 import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelector';
 
 import '@antv/graphin/dist/index.css';
 import NodeMenu from './NodeMenu';
+import AsyncNodeMenu from './AsyncNodeMenu';
 
 interface GraphPanelProps {
   sourceData: LayerNetwork;
@@ -45,7 +44,7 @@ const GraphPanel: React.FC<GraphPanelProps> = (props) => {
 
   // memo: community map
   const communityMap = useMemo(() => {
-    const nodes = sourceData.reduce((all: (HeadCluster | Node)[], cur) => {
+    const nodes = sourceData.reduce((all: Node[], cur) => {
       if (cur) {
         return all.concat(cur.nodes);
       }
@@ -105,16 +104,23 @@ const GraphPanel: React.FC<GraphPanelProps> = (props) => {
       layout={layoutType}
     >
       {/* 右键菜单：展开、收起 */}
-      {async ? null : (
-        <ContextMenu>
+      <ContextMenu>
+        {async ? (
+          <AsyncNodeMenu
+            sourceData={sourceData}
+            displayData={displayData}
+            setDisplayData={handleDisplayDataChange}
+            communityMap={communityMap}
+          />
+        ) : (
           <NodeMenu
             sourceData={sourceData}
             displayData={displayData}
             setDisplayData={handleDisplayDataChange}
             communityMap={communityMap}
           />
-        </ContextMenu>
-      )}
+        )}
+      </ContextMenu>
       {/* 滚轮放大缩小：关闭 */}
       <ZoomCanvas disabled />
       {/* 关联高亮 */}
@@ -133,7 +139,7 @@ const GraphPanel: React.FC<GraphPanelProps> = (props) => {
       >
         {
           Array.from({ length: sourceData.length }).map((_, index) => {
-            const levelText = getLevelText(index, maxLevel);
+            const levelText = getDisplayLevelText(index, maxLevel);
             return (
               <SelectOption key={levelText} value={index}>
                 {levelText}

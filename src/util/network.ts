@@ -1,6 +1,6 @@
 import { Utils } from '@antv/graphin';
 import {
-  Cluster, ClusterEdge, Community, Edge, EdgeMap, HeadCluster, Layer, LayerNetwork, Node, NodeMap,
+  Cluster, ClusterEdge, Edge, EdgeMap, Layer, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
 import { colorSets, colorMap } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from './color/hexToRgba';
@@ -11,16 +11,15 @@ const keyshapeSize = 20;
 const sizeUnit = 3;
 const badgeSize = 12;
 
-export const isNode = (c: Community): c is Node => 'clusterId' in c && !('nodes' in c);
-export const isHeadCluster = (c: Community): c is HeadCluster => 'nodes' in c;
-export const isCluster = (c: Community): c is Cluster => 'clusterId' in c && 'nodes' in c;
-export const isHead = (c: Community): c is HeadCluster => isHeadCluster(c) && !('clusterId' in c);
+export const isNode = (c: unknown): c is Node => typeof c === 'object' && c != null && 'id' in c;
+export const isCluster = (c: unknown): c is Cluster => isNode(c) && 'nodes' in c;
+export const isHeadCluster = (c: unknown) => isCluster(c) && !('clusterId' in c);
 export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
 
-type RNetworkArray = (Node | HeadCluster)[] | RNetworkArray[];
+type RNetworkArray = Node[] | RNetworkArray[];
 export const nodes2Map = (cs: RNetworkArray, map?: NodeMap) => {
-  const cmap = map || new Map<string, Node | HeadCluster>();
-  cs.forEach((c: (Node | HeadCluster | RNetworkArray)) => {
+  const cmap = map || new Map<string, Node>();
+  cs.forEach((c: (Node | RNetworkArray)) => {
     if (Array.isArray(c)) {
       nodes2Map(c, cmap);
     } else {
@@ -38,7 +37,7 @@ export const edges2Map = (es: Edge[], map?: EdgeMap) => {
   return emap;
 };
 
-export const getLevelText = (level: number, maxLevel: number) => {
+export const getDisplayLevelText = (level: number, maxLevel: number) => {
   const conditions: [boolean, string][] = [
     [level > maxLevel, 'oversized level'],
     [level === 0, 'source network'],
@@ -53,11 +52,11 @@ export const getLevelText = (level: number, maxLevel: number) => {
   }
   return res;
 };
-export const getClusterDisplaySize = (c: HeadCluster) => {
+export const getClusterDisplaySize = (c: Cluster) => {
   const cSize = c.count;
   return Math.min((cSize / sizeUnit + 1), 5);
 };
-export const getCommunityColor = (c: Community, index?: number) => {
+export const getNodeColor = (c: Node, index?: number) => {
   const { clusterId, id } = c;
   let color;
   if (clusterId && colorMap.has(clusterId)) {
@@ -69,17 +68,23 @@ export const getCommunityColor = (c: Community, index?: number) => {
   }
   return color;
 };
+/**
+ * recrusive get cluster's child nodes
+ * @param c root cluster
+ * @param nodesMap source nodes map
+ * @param currentNodes current nodes(for recrusion)
+ */
 export const getChildNodes = (
-  c: HeadCluster,
+  c: Cluster,
   nodesMap: NodeMap,
-  currentNodes?: (Node | HeadCluster)[],
+  currentNodes?: Node[],
 ) => {
   const childNodes = currentNodes || [];
   c.nodes.forEach((nodeId) => {
     const n = nodesMap.get(nodeId);
     if (n) {
       childNodes.push(n);
-      if (isHeadCluster(n)) {
+      if (isCluster(n)) {
         childNodes.push(...getChildNodes(n, nodesMap, childNodes));
       }
     }
@@ -92,14 +97,13 @@ export const getChildNodes = (
  * @param dataMap 范围内节点的Map
  */
 export const getRelatedCommunities = (
-  c: Node | HeadCluster,
+  c: Node,
   nodesMap: NodeMap,
-): Array<Node | HeadCluster> => {
-  const relatedCommunities: (Node | HeadCluster)[] = [];
+): Array<Node> => {
+  const relatedCommunities: Node[] = [];
   // 1. 向上查找的情况
-  let cluster: Node | HeadCluster | undefined = c;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  while (isCluster(cluster!)) {
+  let cluster: Node | undefined = c;
+  while (cluster.clusterId) {
     cluster = nodesMap.get(cluster.clusterId);
     if (!cluster) {
       break;
@@ -107,7 +111,7 @@ export const getRelatedCommunities = (
     relatedCommunities.push(cluster);
   }
   // 2. 向下查找
-  if (isHeadCluster(c)) {
+  if (isCluster(c)) {
     const childNodes = getChildNodes(c, nodesMap);
     relatedCommunities.push(...childNodes);
   }
@@ -131,12 +135,12 @@ export const getTargetCommunity = (
   return null;
 };
 
-export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
+export const clusterStyleWrapper = (c: Cluster, color?: string) => {
   const cSize = getClusterDisplaySize(c);
   const kSize = cSize * keyshapeSize;
   const fSize = kSize / 1.6;
   const bSize = cSize * badgeSize;
-  const cColor = color || getCommunityColor(c);
+  const cColor = color || getNodeColor(c);
   const { count } = c;
   const sc = {
     ...c,
@@ -177,9 +181,9 @@ export const clusterStyleWrapper = (c: HeadCluster, color?: string) => {
   };
   return sc;
 };
-export const nodeStyleWrapper = (n: Node, color?: string) => {
+export const normalNodeStyleWrapper = (n: Node, color?: string) => {
   const { id } = n;
-  const cColor = color || getCommunityColor(n);
+  const cColor = color || getNodeColor(n);
   const sn = {
     ...n,
     style: {
@@ -205,11 +209,11 @@ export const nodeStyleWrapper = (n: Node, color?: string) => {
   };
   return sn;
 };
-export const communityStyleWrapper = (n: Node | HeadCluster, color?: string) => {
-  if (isHeadCluster(n)) {
+export const nodeStyleWrapper = (n: Node, color?: string) => {
+  if (isCluster(n)) {
     return clusterStyleWrapper(n, color);
   }
-  return nodeStyleWrapper(n, color);
+  return normalNodeStyleWrapper(n, color);
 };
 export const normalEdgeStyleWrapper = (e: Edge) => e;
 export const clusterEdgeStyleWrapper = (e: ClusterEdge) => ({
@@ -227,14 +231,14 @@ export const edgeStyleWrapper = (e: Edge) => {
   }
   return normalEdgeStyleWrapper(e);
 };
-export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
+export const networkStyleWrapper = (c: Layer) => {
   const { nodes, edges } = c;
-  const styledNodes: (Node | HeadCluster)[] = [];
+  const styledNodes: Node[] = [];
   const styledEdges: Edge[] = [];
 
   nodes.forEach((node, index) => {
-    const color = getCommunityColor(node, index);
-    styledNodes.push(communityStyleWrapper(node, color));
+    const color = getNodeColor(node, index);
+    styledNodes.push(nodeStyleWrapper(node, color));
   });
 
   edges.forEach((edge) => {
