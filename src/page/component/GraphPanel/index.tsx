@@ -1,14 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import Graphin, { Behaviors } from '@antv/graphin';
+import Graphin, { Behaviors, Utils } from '@antv/graphin';
 import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 
 import {
-  DisplayNetwork, Edge, HeadCluster, LayerNetwork, Node,
+  DisplayNetwork, HeadCluster, LayerNetwork, Node,
 } from 'src/type/network';
-import {
-  getLevelText, nodes2Map, networkStyleWrapper, edges2Map,
-} from 'src/util/network';
+import { getLevelText, nodes2Map, networkStyleWrapper } from 'src/util/network';
 
 import Toolbar from './Toolbar';
 import LayoutSelector, { layouts } from './LayoutSelector';
@@ -19,6 +17,7 @@ import NodeMenu from './NodeMenu';
 interface GraphPanelProps {
   sourceData: LayerNetwork;
   expandSourceDataByLevel: (level: number) => Promise<LayerNetwork>;
+  async?: boolean;
 }
 interface GraphPanelState {
   layout: string;
@@ -31,9 +30,9 @@ const {
 } = Behaviors;
 const { Option: SelectOption } = Select;
 
-const GraphPanel = (props: GraphPanelProps) => {
+const GraphPanel: React.FC<GraphPanelProps> = (props) => {
   // props
-  const { sourceData, expandSourceDataByLevel } = props;
+  const { sourceData, expandSourceDataByLevel, async = false } = props;
   const maxLevel = sourceData.length - 1;
 
   // state
@@ -55,16 +54,6 @@ const GraphPanel = (props: GraphPanelProps) => {
     return nodes2Map(nodes);
   }, [sourceData]);
 
-  const edgeMap = useMemo(() => {
-    const edges = sourceData.reduce((all: Edge[], cur) => {
-      if (cur) {
-        return all.concat(cur.edges);
-      }
-      return all;
-    }, []);
-    return edges2Map(edges);
-  }, [sourceData]);
-
   // memo: layout type
   const layoutType = useMemo(() => layouts.find((l) => l.type === layout), [layout]);
 
@@ -75,29 +64,29 @@ const GraphPanel = (props: GraphPanelProps) => {
   const handleLevelChange = async (value: number) => {
     if (value >= 0 && value <= maxLevel) {
       const sourceLayer = sourceData[value];
+      let targetLayer = sourceLayer;
       if (!sourceLayer) {
         const newLayerNetwork = await expandSourceDataByLevel(value);
-        const targetLayer = newLayerNetwork[value];
-        if (targetLayer) {
-          setState((prev) => ({
-            ...prev,
-            displayData: networkStyleWrapper(targetLayer),
-            level: value,
-          }));
-        }
-      } else {
-        setState((prev) => ({
-          ...prev,
-          displayData: networkStyleWrapper(sourceLayer),
-          level: value,
-        }));
+        const remoteTargetLayer = newLayerNetwork[value];
+        targetLayer = remoteTargetLayer;
       }
+      setState((prev) => ({
+        ...prev,
+        displayData: targetLayer ? networkStyleWrapper(targetLayer) : prev.displayData,
+        level: value,
+      }));
     }
   };
   const handleDisplayDataChange = (newDisplayData: DisplayNetwork) => {
+    const { edges } = newDisplayData;
+    const displayEdges = Utils.processEdges(edges, { poly: 50, loop: 10 });
+
     setState((prev) => ({
       ...prev,
-      displayData: newDisplayData,
+      displayData: {
+        ...newDisplayData,
+        edges: displayEdges,
+      },
     }));
   };
 
@@ -116,15 +105,16 @@ const GraphPanel = (props: GraphPanelProps) => {
       layout={layoutType}
     >
       {/* 右键菜单：展开、收起 */}
-      <ContextMenu>
-        <NodeMenu
-          sourceData={sourceData}
-          displayData={displayData}
-          setDisplayData={handleDisplayDataChange}
-          communityMap={communityMap}
-          edgeMap={edgeMap}
-        />
-      </ContextMenu>
+      {async ? null : (
+        <ContextMenu>
+          <NodeMenu
+            sourceData={sourceData}
+            displayData={displayData}
+            setDisplayData={handleDisplayDataChange}
+            communityMap={communityMap}
+          />
+        </ContextMenu>
+      )}
       {/* 滚轮放大缩小：关闭 */}
       <ZoomCanvas disabled />
       {/* 关联高亮 */}

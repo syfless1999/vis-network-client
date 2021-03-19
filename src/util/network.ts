@@ -1,3 +1,4 @@
+import { Utils } from '@antv/graphin';
 import {
   Cluster, ClusterEdge, Community, Edge, EdgeMap, HeadCluster, Layer, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
@@ -68,6 +69,23 @@ export const getCommunityColor = (c: Community, index?: number) => {
   }
   return color;
 };
+export const getChildNodes = (
+  c: HeadCluster,
+  nodesMap: NodeMap,
+  currentNodes?: (Node | HeadCluster)[],
+) => {
+  const childNodes = currentNodes || [];
+  c.nodes.forEach((nodeId) => {
+    const n = nodesMap.get(nodeId);
+    if (n) {
+      childNodes.push(n);
+      if (isHeadCluster(n)) {
+        childNodes.push(...getChildNodes(n, nodesMap, childNodes));
+      }
+    }
+  });
+  return childNodes;
+};
 /**
  * 获得某个节点向上和向下查找的
  * @param c 需要分析的中心节点
@@ -75,18 +93,23 @@ export const getCommunityColor = (c: Community, index?: number) => {
  */
 export const getRelatedCommunities = (
   c: Node | HeadCluster,
-  dataMap: NodeMap,
+  nodesMap: NodeMap,
 ): Array<Node | HeadCluster> => {
   const relatedCommunities: (Node | HeadCluster)[] = [];
-  // TODO 只考虑了向上查找的情况
+  // 1. 向上查找的情况
   let cluster: Node | HeadCluster | undefined = c;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   while (isCluster(cluster!)) {
-    cluster = dataMap.get(cluster.clusterId);
+    cluster = nodesMap.get(cluster.clusterId);
     if (!cluster) {
       break;
     }
     relatedCommunities.push(cluster);
+  }
+  // 2. 向下查找
+  if (isHeadCluster(c)) {
+    const childNodes = getChildNodes(c, nodesMap);
+    relatedCommunities.push(...childNodes);
   }
   return relatedCommunities;
 };
@@ -218,9 +241,11 @@ export const networkStyleWrapper = (c: Layer<Node | HeadCluster>) => {
     styledEdges.push(edgeStyleWrapper(edge));
   });
 
+  const multpleStyledEdges = Utils.processEdges(styledEdges, { poly: 50, loop: 10 });
+
   return {
     nodes: styledNodes,
-    edges: styledEdges,
+    edges: multpleStyledEdges,
   };
 };
 
