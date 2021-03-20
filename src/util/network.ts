@@ -1,6 +1,6 @@
 import { Utils } from '@antv/graphin';
 import {
-  Cluster, ClusterEdge, Edge, EdgeMap, Layer, LayerNetwork, Node, NodeMap,
+  Cluster, ClusterEdge, Edge, EdgeMap, Network, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
 import { colorSets, colorMap } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from './color/hexToRgba';
@@ -15,27 +15,6 @@ export const isNode = (c: unknown): c is Node => typeof c === 'object' && c != n
 export const isCluster = (c: unknown): c is Cluster => isNode(c) && 'nodes' in c;
 export const isHeadCluster = (c: unknown) => isCluster(c) && !('clusterId' in c);
 export const isClusterEdge = (e: Edge): e is ClusterEdge => 'count' in e;
-
-type RNetworkArray = Node[] | RNetworkArray[];
-export const nodes2Map = (cs: RNetworkArray, map?: NodeMap) => {
-  const cmap = map || new Map<string, Node>();
-  cs.forEach((c: (Node | RNetworkArray)) => {
-    if (Array.isArray(c)) {
-      nodes2Map(c, cmap);
-    } else {
-      cmap.set(c.id, c);
-    }
-  });
-  return cmap;
-};
-export const edges2Map = (es: Edge[], map?: EdgeMap) => {
-  const emap = map || new Map<string, Edge>();
-  es.forEach((e) => {
-    const key = getJoinString(e.source, e.target);
-    emap.set(key, e);
-  });
-  return emap;
-};
 
 export const getDisplayLevelText = (level: number, maxLevel: number) => {
   const conditions: [boolean, string][] = [
@@ -96,7 +75,7 @@ export const getChildNodes = (
  * @param c 需要分析的中心节点
  * @param dataMap 范围内节点的Map
  */
-export const getRelatedCommunities = (
+export const getRelatedNodes = (
   c: Node,
   nodesMap: NodeMap,
 ): Array<Node> => {
@@ -117,17 +96,17 @@ export const getRelatedCommunities = (
   }
   return relatedCommunities;
 };
-export const getTargetCommunity = (
+export const getTargetNode = (
   targetId: string,
   displayNodeMap: NodeMap,
-  communityMap: NodeMap,
+  nodeMap: NodeMap,
 ) => {
-  const relatedCommunities = getRelatedCommunities(
+  const relatedNodes = getRelatedNodes(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    communityMap.get(targetId)!, communityMap,
+    nodeMap.get(targetId)!, nodeMap,
   );
-  for (let i = 0; i < relatedCommunities.length; i += 1) {
-    const relatedId = relatedCommunities[i].id;
+  for (let i = 0; i < relatedNodes.length; i += 1) {
+    const relatedId = relatedNodes[i].id;
     if (displayNodeMap.has(relatedId)) {
       return relatedId;
     }
@@ -231,7 +210,7 @@ export const edgeStyleWrapper = (e: Edge) => {
   }
   return normalEdgeStyleWrapper(e);
 };
-export const networkStyleWrapper = (c: Layer) => {
+export const networkStyleWrapper = (c: Network) => {
   const { nodes, edges } = c;
   const styledNodes: Node[] = [];
   const styledEdges: Edge[] = [];
@@ -281,7 +260,7 @@ export const fillDisplayEdges = (
     if (displayNodeMap.has(source) && displayNodeMap.has(target)) {
       addEdge(source, target, edge);
     } else if (displayNodeMap.has(source)) {
-      const targetId = getTargetCommunity(target, displayNodeMap, sourceNodeMap);
+      const targetId = getTargetNode(target, displayNodeMap, sourceNodeMap);
       if (targetId) {
         addEdge(source, targetId, {
           source,
@@ -289,7 +268,7 @@ export const fillDisplayEdges = (
         });
       }
     } else if (displayNodeMap.has(target)) {
-      const sourceId = getTargetCommunity(source, displayNodeMap, sourceNodeMap);
+      const sourceId = getTargetNode(source, displayNodeMap, sourceNodeMap);
       if (sourceId) {
         addEdge(sourceId, target, {
           source: sourceId,
@@ -310,15 +289,15 @@ export const mergeTwoLayerNetwork = (oldLn: LayerNetwork, newLn: LayerNetwork): 
   }
   const res: LayerNetwork = Array.from({ length: oldLn.length });
   for (let i = 0; i < oldLn.length; i += 1) {
-    const layer1 = oldLn[i];
-    const layer2 = newLn[i];
-    if (layer1 && layer2) {
+    const network1 = oldLn[i];
+    const network2 = newLn[i];
+    if (network1 && network2) {
       res[i] = {
-        nodes: layer1.nodes.concat(layer2.nodes),
-        edges: layer1.edges.concat(layer2.edges),
+        nodes: network1.nodes.concat(network2.nodes),
+        edges: network1.edges.concat(network2.edges),
       };
     } else {
-      res[i] = layer1 || layer2;
+      res[i] = network1 || network2;
     }
   }
   return res;

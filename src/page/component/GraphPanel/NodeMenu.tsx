@@ -1,32 +1,25 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { GraphinContext } from '@antv/graphin';
 import { ContextMenu } from '@antv/graphin-components';
+import { isHeadCluster, isCluster, fillDisplayEdges } from 'src/util/network';
 import {
-  nodeStyleWrapper,
-  nodes2Map,
-  isHeadCluster,
-  isCluster,
-  fillDisplayEdges,
-  edges2Map,
-} from 'src/util/network';
-import {
-  Node, DisplayNetwork, Edge, NodeMap, LayerNetwork, Cluster,
+  Node, Edge, NodeMap, LayerNetwork, Network,
 } from 'src/type/network';
-import { deleteItemWithoutOrder } from 'src/util/array';
+import { array2Map, deleteItemWithoutOrder } from 'src/util/array';
+import { getJoinString } from 'src/util/string';
 
 interface NodeMenuProps {
-  displayData: DisplayNetwork;
-  communityMap: NodeMap;
+  displayData: Network;
+  nodeMap: NodeMap;
   sourceData: LayerNetwork;
-  setDisplayData: (newDisplayData: DisplayNetwork) => void;
+  setDisplayData: (newDisplayData: Network) => void;
 }
 
 const { Menu } = ContextMenu;
 
 const CustomMenu = (props: NodeMenuProps) => {
   const {
-    displayData, setDisplayData, communityMap, sourceData,
+    displayData, setDisplayData, nodeMap, sourceData,
   } = props;
   const graphin = React.useContext(GraphinContext);
   const { contextmenu, graph } = graphin;
@@ -43,11 +36,12 @@ const CustomMenu = (props: NodeMenuProps) => {
 
       // 1.2 加点
       model.nodes.forEach((nodeId) => {
-        if (communityMap.has(nodeId)) {
-          displayNodes.push(nodeStyleWrapper(communityMap.get(nodeId)!));
+        const node = nodeMap.get(nodeId);
+        if (node) {
+          displayNodes.push(node);
         }
       });
-      const displayNodeMap = nodes2Map(displayNodes);
+      const displayNodeMap = array2Map<string, Node>(displayNodes, (v) => v.id);
       // 2. 边
       // 21. 删除和model有关的边
       deleteItemWithoutOrder(
@@ -59,13 +53,13 @@ const CustomMenu = (props: NodeMenuProps) => {
       const allEdges = sourceData.reduce(
         (prev: Edge[], cur) => (cur && cur.edges ? prev.concat(cur.edges) : prev), [],
       );
-      const displayEdgesMap = edges2Map(displayEdges);
+      const displayEdgesMap = array2Map(displayEdges, (e) => getJoinString(e.source, e.target));
       fillDisplayEdges(
         displayEdges,
         displayEdgesMap,
         allEdges,
         displayNodeMap,
-        communityMap,
+        nodeMap,
       );
       setDisplayData({
         nodes: displayNodes,
@@ -78,43 +72,42 @@ const CustomMenu = (props: NodeMenuProps) => {
       const { nodes, edges } = displayData;
       const displayNodes = [...nodes];
       const displayEdges = [...edges];
-      if (!communityMap.has(model.clusterId)) {
+      const clusterNode = nodeMap.get(model.clusterId);
+
+      if (!clusterNode || !isCluster(clusterNode)) {
         return;
       }
       // 1. 点: 删同级点 / 加cluster
-      const clusterNode = communityMap.get(model.clusterId)!;
-      const { nodes: sameLevelNodeIds } = clusterNode as Cluster;
+      const { nodes: sameLevelNodeIds } = clusterNode;
 
       // 11. 加点
-      displayNodes.push(nodeStyleWrapper(clusterNode));
+      displayNodes.push(clusterNode);
 
       // 12. 删点
-      const sameLevelNodeMap = nodes2Map(
-        sameLevelNodeIds.map((nodeId) => communityMap.get(nodeId)!),
-      );
+      const sameLevelNodeIdMap = array2Map(sameLevelNodeIds, (v) => v);
       deleteItemWithoutOrder(
         displayNodes,
-        (node) => sameLevelNodeMap.has(node.id),
+        (node) => sameLevelNodeIdMap.has(node.id),
       );
 
-      const displayNodeMap = nodes2Map(displayNodes);
+      const displayNodeMap = array2Map(displayNodes, (v) => v.id);
       // 2. 边: 删原来的点的边 / 加新点的边
       // 21. 删边
       deleteItemWithoutOrder(
         displayEdges,
-        (edge) => sameLevelNodeMap.has(edge.source) || sameLevelNodeMap.has(edge.target),
+        (edge) => sameLevelNodeIdMap.has(edge.source) || sameLevelNodeIdMap.has(edge.target),
       );
       // 22. 加边
       const allEdges = sourceData.reduce(
         (prev: Edge[], cur) => (cur && cur.edges ? prev.concat(cur.edges) : prev), [],
       );
-      const displayEdgesMap = edges2Map(displayEdges);
+      const displayEdgesMap = array2Map(displayEdges, (e) => getJoinString(e.source, e.target));
       fillDisplayEdges(
         displayEdges,
         displayEdgesMap,
         allEdges,
         displayNodeMap,
-        communityMap,
+        nodeMap,
       );
       setDisplayData({
         nodes: displayNodes,
