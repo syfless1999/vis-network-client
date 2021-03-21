@@ -43,7 +43,7 @@ const GraphPanel: React.FC<GraphPanelProps> = (props) => {
 
   // state
   const [state, setState] = useState<GraphPanelState>({
-    layout: 'circular',
+    layout: 'random',
     level: maxLevel,
     displayData: { nodes: [], edges: [] },
   });

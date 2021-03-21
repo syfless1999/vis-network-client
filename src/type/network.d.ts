@@ -21,6 +21,11 @@ export interface EdgeBase {
 export interface Edge extends EdgeBase {
   [key: string]: unknown;
 }
+export interface CrossLevelEdge extends Edge {
+  nid: string;
+  cid: string;
+}
+
 export interface ClusterEdge extends Edge {
   count: number;
 }

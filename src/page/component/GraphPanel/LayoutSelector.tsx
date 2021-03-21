@@ -27,6 +27,12 @@ export const layouts = [
     },
   },
   {
+    type: 'gForce',
+  },
+  {
+    type: 'random',
+  },
+  {
     type: 'grid',
     // begin: [0, 0], // 可选，
     // preventOverlap: true, // 可选，必须配合 nodeSize

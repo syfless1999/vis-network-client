@@ -89,7 +89,7 @@ const CustomMenu: React.FC<AsyncNodeMenuProps> = (props) => {
   return (
     <Menu bindType="node">
       {isCluster(model) ? <Menu.Item onClick={handleExpand}>Expand</Menu.Item> : <></>}
-      {isHeadCluster(model) ? <Menu.Item onClick={handleShrink}>Shrink</Menu.Item> : <></>}
+      {!isHeadCluster(model) ? <Menu.Item onClick={handleShrink}>Shrink</Menu.Item> : <></>}
       <Menu.Item onClick={handleHide}>Hide</Menu.Item>
     </Menu>
   );
