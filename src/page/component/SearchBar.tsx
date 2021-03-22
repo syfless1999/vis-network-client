@@ -2,12 +2,20 @@ import React from 'react';
 import { Input } from 'antd';
 
 import useRequest from 'src/util/hook/useRequest';
+import styled from 'styled-components';
 
 export interface SearchBarProps {
   onSearch: (value: string) => Promise<void>;
 }
 
 const { Search } = Input;
+
+const ISearch = styled(Search)`
+  width: auto;
+  .ant-input {
+    border-radius: 15px 0 0 15px;
+  }
+`;
 
 const SearchBar: React.FC<SearchBarProps> = (props) => {
   const { onSearch } = props;
@@ -18,7 +26,7 @@ const SearchBar: React.FC<SearchBarProps> = (props) => {
   };
 
   return (
-    <Search
+    <ISearch
       enterButton
       onSearch={handleSearch}
       loading={loading}

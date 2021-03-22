@@ -12,8 +12,6 @@ import { completeNetworkData, getLayerNetworkData, getAroundNetwork } from 'src/
 import * as network from 'src/type/network';
 import { mergeTwoLayerNetwork, getDisplayLevelText, networkStyleWrapper } from 'src/util/network';
 
-// import '@antv/graphin/dist/index.css';
-
 interface NetworkParam {
   label: string;
   taskId: string;
@@ -136,6 +134,7 @@ const Network = () => {
         {/* 适应视图 */}
         <FitView />
         <Toolbar />
+        <SearchBar onSearch={handleSearchNodeAroundNetwork} />
         {/* 布局类型选择 */}
         <LayoutSelector value={layout} onChange={handleChangeLayout} />
         {/* 聚类等级 */}
@@ -156,7 +155,6 @@ const Network = () => {
             })
           }
         </Select>
-        <SearchBar onSearch={handleSearchNodeAroundNetwork} />
       </Graphin>
     </div>
   );
