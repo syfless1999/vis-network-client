@@ -13,7 +13,7 @@ function DataSourceList(props: { list: Array<Task> }) {
   const history = useHistory();
   const handleTaskResultView = (label: string, taskId: string) => {
     if (!label) return;
-    history.push(`/task/network/${label}/${taskId}`);
+    history.push(`/network/${label}/${taskId}`);
   };
   return (
     <Table rowKey="_id" dataSource={list}>

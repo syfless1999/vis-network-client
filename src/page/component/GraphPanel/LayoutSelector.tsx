@@ -27,9 +27,6 @@ export const layouts = [
     },
   },
   {
-    type: 'gForce',
-  },
-  {
     type: 'random',
   },
   {

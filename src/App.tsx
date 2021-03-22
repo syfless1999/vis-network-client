@@ -8,7 +8,7 @@ import Footer from 'src/page/layout/Footer';
 
 import DataSource from 'src/page/datasource';
 import Task from 'src/page/task';
-import SingleNetwork from 'src/page/task/Network';
+import SingleNetwork from 'src/page/network/Network';
 
 import 'src/app.less';
 
@@ -29,8 +29,8 @@ function App() {
   const Router = () => (
     <Switch>
       <Route path="/datasource"><DataSource /></Route>
-      <Route path="/task/network/:label/:taskId"><SingleNetwork /></Route>
       <Route path="/task"><Task /></Route>
+      <Route path="/network/:label/:taskId"><SingleNetwork /></Route>
       <Route path="/"><h1>home</h1></Route>
     </Switch>
   );

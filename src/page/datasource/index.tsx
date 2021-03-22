@@ -13,6 +13,14 @@ const DataSourcePanel = () => {
     () => setDrawerVisible(!drawerVisible),
     [drawerVisible],
   );
+  // TODO
+  const handleSearch = async () => {
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+  };
 
   const handleAddSubmit = (values: AddDataSourceParam) => {
     const params = {
@@ -32,7 +40,7 @@ const DataSourcePanel = () => {
 
   return (
     <div>
-      <SearchAndAddBar title="Data Source List" handleClick={changeDrawerVisible} />
+      <SearchAndAddBar title="Data Source List" onClick={changeDrawerVisible} onSearch={handleSearch} />
       <DataSourceList dataSource={list} />
       <AddDataSourceDrawer
         visible={drawerVisible}

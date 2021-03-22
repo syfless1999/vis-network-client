@@ -21,6 +21,14 @@ const DataSourcePanel = () => {
     () => setDrawerVisible(!drawerVisible),
     [drawerVisible],
   );
+  // TODO
+  const handleSearch = async () => {
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+  };
 
   const handleAddSubmit = (values: AddTaskParams) => {
     const params: CreateTaskParams = {
@@ -53,7 +61,7 @@ const DataSourcePanel = () => {
 
   return (
     <div>
-      <SearchAndAddBar title="Task List" handleClick={changeDrawerVisible} />
+      <SearchAndAddBar title="Task List" onClick={changeDrawerVisible} onSearch={handleSearch} />
       <TaskList list={list} />
       <AddTaskDrawer
         visible={drawerVisible}

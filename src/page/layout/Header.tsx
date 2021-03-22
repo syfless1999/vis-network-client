@@ -20,7 +20,6 @@ const MyHeader = () => {
         <Menu.Item><Link to="/">Home</Link></Menu.Item>
         <Menu.Item><Link to="/datasource">Datasource</Link></Menu.Item>
         <Menu.Item><Link to="/task">Task</Link></Menu.Item>
-        <Menu.Item><Link to="/network">Network</Link></Menu.Item>
       </Menu>
     </Container>
   );

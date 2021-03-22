@@ -2,9 +2,10 @@ import React from 'react';
 import { GraphinContext } from '@antv/graphin';
 import { ContextMenu } from '@antv/graphin-components';
 import { isHeadCluster, isCluster } from 'src/util/network';
-import { Node, Network } from 'src/type/network';
+import { Node, Network, IdNetwork } from 'src/type/network';
 import { array2Map, deleteItemWithoutOrder } from 'src/util/array';
-import { CompleteNetworkFunc } from '.';
+
+export type CompleteNetworkFunc = (currentNetwork: IdNetwork, newIds: string[]) => Promise<Network>
 
 interface AsyncNodeMenuProps {
   displayData: Network;

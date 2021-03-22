@@ -1,28 +1,29 @@
 import React from 'react';
 import {
-  Button, Col, Row, Input, Typography,
+  Button, Col, Row, Typography,
 } from 'antd';
+
+import SearchBar from './SearchBar';
 
 export interface SearchAndAddBarProps {
   title: string;
-  handleClick: () => void;
+  onSearch: (v: string) => Promise<void>,
+  onClick: () => void;
 }
 
-const { Search } = Input;
 const { Title } = Typography;
-
 function SearchAndAddBar(props: SearchAndAddBarProps) {
-  const { title, handleClick } = props;
+  const { title, onClick, onSearch } = props;
   return (
     <Row align="middle" justify="start" gutter={16} style={{ marginBottom: 10 }}>
       <Col span={6}>
         <Title level={3} mark>{title}</Title>
       </Col>
       <Col span={6}>
-        <Search placeholder="input search text" enterButton />
+        <SearchBar onSearch={onSearch} />
       </Col>
       <Col>
-        <Button type="primary" onClick={handleClick}>ADD</Button>
+        <Button type="primary" onClick={onClick}>ADD</Button>
       </Col>
     </Row>
   );

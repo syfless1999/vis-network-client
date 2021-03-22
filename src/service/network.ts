@@ -1,10 +1,13 @@
 import request from 'src/util/Request';
 import * as network from 'src/type/network';
 
-export function getLayerNetworkData(taskId: string, level?: number) {
-  const url = `/network/${taskId}`;
-  const prefix = level == null ? '' : `?level=${level}`;
-  return request<network.LayerNetwork>([url, prefix].join(''));
+export interface GetLayerNetworkDataParam {
+  taskId: string,
+  level?: string,
+}
+export function getLayerNetworkData(param: GetLayerNetworkDataParam) {
+  const url = `/network/layer?${new URLSearchParams(param as unknown as Record<string, string>).toString()}`;
+  return request<network.LayerNetwork>(url);
 }
 
 export interface CompleteNetworkDataParam {
@@ -22,4 +25,14 @@ export function completeNetworkData(param: CompleteNetworkDataParam) {
       'content-type': 'application/json',
     },
   });
+}
+
+export interface GetNodeAroundNetworkParam extends Record<string, string> {
+  label: string;
+  taskId: string;
+  nodeId: string;
+}
+export function getAroundNetwork(param: GetNodeAroundNetworkParam) {
+  const url = `/network/around?${new URLSearchParams(param).toString()}`;
+  return request<network.Network>(url);
 }
