@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Select } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
 import Graphin, { Behaviors, Utils } from '@antv/graphin';
 
@@ -10,13 +9,13 @@ import LayoutSelector, { layouts } from 'src/page/component/GraphPanel/LayoutSel
 import SearchBar from 'src/page/component/SearchBar';
 import { completeNetworkData, getLayerNetworkData, getAroundNetwork } from 'src/service/network';
 import * as network from 'src/type/network';
-import { mergeTwoLayerNetwork, getDisplayLevelText, networkStyleWrapper } from 'src/util/network';
+import { mergeTwoLayerNetwork, networkStyleWrapper } from 'src/util/network';
+import LevelSelector from '../component/GraphPanel/LevelSelector';
 
 interface NetworkParam {
   label: string;
   taskId: string;
 }
-
 interface NetworkState {
   layout: string;
   level: number;
@@ -27,7 +26,6 @@ interface NetworkState {
 const {
   ZoomCanvas, FitView, ActivateRelations,
 } = Behaviors;
-const { Option: SelectOption } = Select;
 
 const Network = () => {
   const [state, setState] = useState<NetworkState>({
@@ -60,7 +58,7 @@ const Network = () => {
       displayData: newDisplayData,
     }));
   };
-  const handleLevelChange = async (value: number) => {
+  const handleLevelChange = React.useCallback(async (value: number) => {
     if (value < 0 || value > maxLevel) return;
     let targetNetwork = sourceData[value];
     let newSourceData = sourceData;
@@ -78,7 +76,7 @@ const Network = () => {
       sourceData: newSourceData,
       displayData: targetNetwork || prev.displayData,
     }));
-  };
+  }, [sourceData]);
   const handleSearchNodeAroundNetwork = async (nodeId: string) => {
     const newDisplayData = await getAroundNetwork({ label, taskId, nodeId });
     handleDisplayDataChange(newDisplayData);
@@ -120,12 +118,6 @@ const Network = () => {
             setDisplayData={handleDisplayDataChange}
             completeNetwork={completeNetwork}
           />
-          {/* <NodeMenu
-            sourceData={sourceData}
-            displayData={displayData}
-            setDisplayData={handleDisplayDataChange}
-            nodeMap={nodeMap}
-          /> */}
         </ContextMenu>
         {/* 滚轮放大缩小：关闭 */}
         <ZoomCanvas disabled />
@@ -138,23 +130,11 @@ const Network = () => {
         {/* 布局类型选择 */}
         <LayoutSelector value={layout} onChange={handleChangeLayout} />
         {/* 聚类等级 */}
-        <Select
-          bordered={false}
-          value={level}
+        <LevelSelector
+          level={level}
+          maxLevel={maxLevel}
           onChange={handleLevelChange}
-          placeholder="cluster level"
-        >
-          {
-            Array.from({ length: sourceData.length }).map((_, index) => {
-              const levelText = getDisplayLevelText(index, maxLevel);
-              return (
-                <SelectOption key={levelText} value={index}>
-                  {levelText}
-                </SelectOption>
-              );
-            })
-          }
-        </Select>
+        />
       </Graphin>
     </div>
   );

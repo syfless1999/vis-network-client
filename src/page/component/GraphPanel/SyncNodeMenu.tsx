@@ -8,7 +8,7 @@ import {
 import { array2Map, deleteItemWithoutOrder } from 'src/util/array';
 import { getJoinString } from 'src/util/string';
 
-interface NodeMenuProps {
+interface SyncNodeMenuProps {
   displayData: Network;
   nodeMap: NodeMap;
   sourceData: LayerNetwork;
@@ -17,7 +17,7 @@ interface NodeMenuProps {
 
 const { Menu } = ContextMenu;
 
-const CustomMenu = (props: NodeMenuProps) => {
+const CustomMenu = (props: SyncNodeMenuProps) => {
   const {
     displayData, setDisplayData, nodeMap, sourceData,
   } = props;
