@@ -7,10 +7,11 @@ import AsyncNodeMenu, { CompleteNetworkFunc } from 'src/page/component/GraphPane
 import Toolbar from 'src/page/component/GraphPanel/Toolbar';
 import LayoutSelector, { layouts } from 'src/page/component/GraphPanel/LayoutSelector';
 import SearchBar from 'src/page/component/SearchBar';
+import LevelSelector from 'src/page/component/GraphPanel/LevelSelector';
 import { completeNetworkData, getLayerNetworkData, getAroundNetwork } from 'src/service/network';
 import * as network from 'src/type/network';
-import { mergeTwoLayerNetwork, networkStyleWrapper } from 'src/util/network';
-import LevelSelector from '../component/GraphPanel/LevelSelector';
+import { mergeTwoLayerNetwork } from 'src/util/network';
+import { networkStyleWrapper } from 'src/util/network/styleWrapper';
 
 interface NetworkParam {
   label: string;
@@ -52,12 +53,12 @@ const Network = () => {
     ...prev,
     layout: value,
   }));
-  const handleDisplayDataChange = (newDisplayData: network.Network) => {
+  const handleDisplayDataChange = React.useCallback((newDisplayData: network.Network) => {
     setState((prev) => ({
       ...prev,
       displayData: newDisplayData,
     }));
-  };
+  }, []);
   const handleLevelChange = React.useCallback(async (value: number) => {
     if (value < 0 || value > maxLevel) return;
     let targetNetwork = sourceData[value];
@@ -81,7 +82,7 @@ const Network = () => {
     const newDisplayData = await getAroundNetwork({ label, taskId, nodeId });
     handleDisplayDataChange(newDisplayData);
   };
-  const completeNetwork: CompleteNetworkFunc = async (currentNetwork, newIds) => {
+  const handleCompleteNetwork: CompleteNetworkFunc = async (currentNetwork, newIds) => {
     const newNetwork = await completeNetworkData({
       label,
       taskId,
@@ -116,7 +117,7 @@ const Network = () => {
           <AsyncNodeMenu
             displayData={displayData}
             setDisplayData={handleDisplayDataChange}
-            completeNetwork={completeNetwork}
+            completeNetwork={handleCompleteNetwork}
           />
         </ContextMenu>
         {/* 滚轮放大缩小：关闭 */}

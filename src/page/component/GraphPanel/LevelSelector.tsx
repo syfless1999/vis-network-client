@@ -1,6 +1,5 @@
 import { Select } from 'antd';
 import React from 'react';
-import { getDisplayLevelText } from 'src/util/network';
 
 interface LevelSelectorProps {
   level: number;
@@ -8,6 +7,22 @@ interface LevelSelectorProps {
   onChange: (level: number) => void;
 }
 const { Option } = Select;
+
+export const getDisplayLevelText = (level: number, maxLevel: number) => {
+  const conditions: [boolean, string][] = [
+    [level > maxLevel, 'oversized level'],
+    [level === 0, 'source network'],
+    [true, `level-${level}`],
+  ];
+  let res = '';
+  for (let i = 0; i < conditions.length; i += 1) {
+    if (conditions[i][0]) {
+      [, res] = conditions[i];
+      break;
+    }
+  }
+  return res;
+};
 
 const LevelSelector: React.FC<LevelSelectorProps> = (props) => {
   const { level, maxLevel, onChange } = props;
