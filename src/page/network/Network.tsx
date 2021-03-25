@@ -12,6 +12,7 @@ import { completeNetworkData, getLayerNetworkData, getAroundNetwork } from 'src/
 import * as network from 'src/type/network';
 import { mergeTwoLayerNetwork } from 'src/util/network';
 import { networkStyleWrapper } from 'src/util/network/styleWrapper';
+import register from 'src/util/g6Node/register';
 
 interface NetworkParam {
   label: string;
@@ -27,6 +28,9 @@ interface NetworkState {
 const {
   ZoomCanvas, FitView, ActivateRelations,
 } = Behaviors;
+
+// register custom g6 source
+register();
 
 const Network = () => {
   const [state, setState] = useState<NetworkState>({

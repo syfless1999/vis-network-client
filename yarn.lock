@@ -316,10 +316,10 @@
   dependencies:
     "@antv/util" "^2.0.10"
 
-"@antv/graphin@2.0.3":
-  version "2.0.3"
-  resolved "https://registry.npm.taobao.org/@antv/graphin/download/@antv/graphin-2.0.3.tgz#84f272cb9d6ca1a1d0348e61be583d57c25ec1f3"
-  integrity sha1-hPJyy51soaHQNI5hvlg9V8JewfM=
+"@antv/graphin@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.npm.taobao.org/@antv/graphin/download/@antv/graphin-2.0.4.tgz#d2178fa5f24a91ac56763d4cb58f83aa418f71a4"
+  integrity sha1-0hePpfJKkaxWdj1MtY+DqkGPcaQ=
   dependencies:
     "@antv/g-canvas" "^0.5.1"
     "@antv/g6" "4.1.13"

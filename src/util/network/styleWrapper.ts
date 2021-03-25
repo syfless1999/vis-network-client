@@ -3,7 +3,6 @@ import * as network from 'src/type/network';
 import { colorMap, colorSets } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from 'src/util/color/hexToRgba';
 import { isCluster, isClusterEdge } from 'src/util/network';
-
 // constant
 const keyshapeSize = 20;
 const sizeUnit = 3;

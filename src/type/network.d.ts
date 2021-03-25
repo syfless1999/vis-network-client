@@ -1,6 +1,8 @@
-export interface Feature {
-  property: string;
-  desc: string;
+export interface Feat {
+  [feat: string]: number;
+}
+export interface Features {
+  [prop: string]: Feat;
 }
 export interface Node {
   id: string;
@@ -11,7 +13,7 @@ export interface Node {
 export interface Cluster extends Node {
   nodes: string[];
   count: number;
-  features?: string[];
+  features?: string;
   taskId?: string;
 }
 export interface EdgeBase {
@@ -27,11 +29,15 @@ export interface CrossLevelEdge extends Edge {
 }
 
 export interface ClusterEdge extends Edge {
-  count: number;
+  count?: number;
 }
-export type Network = {
+export interface Network {
   nodes: Node[];
   edges: Edge[];
+}
+export interface ClusterNetwork extends Network {
+  nodes: Cluster[];
+  edges: ClusterEdge[];
 }
 export type IdNetwork = {
   nodes: string[];
