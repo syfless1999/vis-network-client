@@ -3,30 +3,29 @@ import * as network from 'src/type/network';
 import { colorMap, colorSets } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from 'src/util/color/hexToRgba';
 import { isCluster, isClusterEdge } from 'src/util/network';
+import { count2String } from 'src/util/string';
+
 // constant
-const keyshapeSize = 20;
-const sizeUnit = 3;
-const badgeSize = 12;
+const NODE_UNIT = 3;
 
 const NODE_SIZE = 26;
-const ICON_SIZE = 15;
-const BADGE_SIZE = 12;
+const ICON_SIZE = 12;
 
-export const getClusterDisplaySize = (c: network.Cluster) => {
-  const cSize = c.count;
-  return Math.min((cSize / sizeUnit + 1), 5);
+export const getMultiple = (c: network.Cluster) => {
+  const { count } = c;
+  return Math.min(Math.max(2, count / NODE_UNIT), 8);
 };
 export const getNodeColor = (c: network.Node, index?: number) => {
-  const { clusterId, id } = c;
-  let color;
-  if (clusterId && colorMap.has(clusterId)) {
-    color = colorMap.get(clusterId);
-  } else {
-    const hash = (index || Math.floor(Math.random() * colorSets.length)) % colorSets.length;
-    color = colorSets[hash].mainFill;
-    colorMap.set(id, color);
+  const { id } = c;
+  const color = colorMap.get(id);
+  if (color) {
+    return color;
   }
-  return color;
+  const len = colorSets.length;
+  const ran = (index || Math.floor(Math.random() * len)) % len;
+  const ranColor = colorSets[ran].mainFill;
+  colorMap.set(id, ranColor);
+  return ranColor;
 };
 export const normalNodeStyleWrapper = (n: network.Node, color?: string) => {
   const { id } = n;
@@ -49,47 +48,26 @@ export const normalNodeStyleWrapper = (n: network.Node, color?: string) => {
   return sn;
 };
 export const clusterStyleWrapper = (c: network.Cluster, color?: string) => {
-  const cSize = getClusterDisplaySize(c);
-  const kSize = cSize * keyshapeSize;
-  const fSize = kSize / 1.6;
-  const bSize = cSize * badgeSize;
-  const cColor = color || getNodeColor(c);
-  const { count } = c;
+  const clusterColor = color || getNodeColor(c);
+  const m = getMultiple(c);
+  const clusterSize = m * NODE_SIZE;
+  const iconSize = m * ICON_SIZE;
+  const count = count2String(c.count);
   const sc = {
     ...c,
     style: {
       keyshape: {
-        fill: hexToRgbaToHex(cColor, 0.1),
-        strokeWidth: 1.2,
-        stroke: cColor,
-        size: [kSize, kSize],
-      },
-      halo: {
-        fill: hexToRgbaToHex(cColor, 0.1),
-        strokeWidth: 1.2,
-        stroke: color,
+        fill: hexToRgbaToHex(clusterColor, 0.1),
+        stroke: clusterColor,
+        size: [clusterSize, clusterSize],
       },
       icon: {
         fontFamily: 'graphin',
         type: 'font',
-        value: c.id,
-        fill: cColor,
-        size: fSize,
+        value: count,
+        fill: clusterColor,
+        size: iconSize,
       },
-      badges: [
-        {
-          position: 'RT',
-          type: 'text',
-          value: count,
-          size: [bSize, bSize],
-          fill: cColor,
-          stroke: cColor,
-          color: '#fff',
-          fontSize: bSize * 0.8,
-          padding: 0,
-          offset: [0, 0],
-        },
-      ],
     },
   };
   return sc;
@@ -101,15 +79,7 @@ export const nodeStyleWrapper = (n: network.Node, color?: string) => {
   return normalNodeStyleWrapper(n, color);
 };
 export const normalEdgeStyleWrapper = (e: network.Edge) => e;
-export const clusterEdgeStyleWrapper = (e: network.ClusterEdge) => ({
-  ...e,
-  style: {
-    label: {
-      value: `${e.count}`,
-      fontSize: 12,
-    },
-  },
-});
+export const clusterEdgeStyleWrapper = (e: network.ClusterEdge) => e;
 export const edgeStyleWrapper = (e: network.Edge) => {
   if (isClusterEdge(e)) {
     return clusterEdgeStyleWrapper(e);

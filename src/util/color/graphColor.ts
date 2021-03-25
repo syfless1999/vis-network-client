@@ -34,5 +34,5 @@ const colorSets = [
   },
 ];
 
-const colorMap = new Map();
+const colorMap = new Map<string, string>();
 export { colorMap, colorSets };
