@@ -30,7 +30,7 @@ function App() {
     <Switch>
       <Route path="/datasource"><DataSource /></Route>
       <Route path="/task"><Task /></Route>
-      <Route path="/network/:label/:taskId"><SingleNetwork /></Route>
+      <Route path="/network/:taskId"><SingleNetwork /></Route>
       <Route path="/"><h1>home</h1></Route>
     </Switch>
   );

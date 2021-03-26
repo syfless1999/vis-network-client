@@ -1,3 +1,5 @@
+import DataSource from './datasource';
+
 /* eslint-disable semi */
 export enum TaskClusterType {
   PARAM_ONLY = 'PARAM',
@@ -13,7 +15,7 @@ export default interface Task {
   _id: string;
   progress: number; // display
   dataSourceId: string; // display
-  dataSource: { name: string }[];
+  dataSource: DataSource[];
   dataSourceName?: string;
   clusterType: TaskClusterType; // display
   paramWeight?: Array<Array<string | number>>;
@@ -21,4 +23,5 @@ export default interface Task {
   needCustomizeSimilarityApi: boolean;
   similarityApi?: string;
   updateCycle: number;
+  largestLevel: number;
 }

@@ -24,3 +24,10 @@ export function createTask(params: CreateTaskParams) {
 export function getTaskList() {
   return request<Task[]>('/task');
 }
+export interface GetOneTaskParams {
+  id: string;
+}
+export function getOneTask(params: GetOneTaskParams) {
+  const { id } = params;
+  return request<Task>(`/task/${id}`);
+}

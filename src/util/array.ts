@@ -51,3 +51,17 @@ export const array2Map = <T, U>(
   });
   return newMap;
 };
+
+export const getRandomValue = <T>(arr: T[], num = 1) => {
+  const map: Record<number, number> = {};
+  const len = arr.length;
+  const res: T[] = [];
+  while (res.length < num) {
+    const ran = Math.floor(Math.random() * len);
+    if (!map[ran]) {
+      map[ran] = 1;
+      res.push(arr[ran]);
+    }
+  }
+  return res;
+};

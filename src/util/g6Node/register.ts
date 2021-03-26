@@ -1,5 +1,7 @@
 import Graphin from '@antv/graphin';
-import { ShapeOptions, IGroup, ModelConfig, IShape } from '@antv/g6';
+import {
+  ShapeOptions, IGroup, ModelConfig, IShape,
+} from '@antv/g6';
 
 const lightBlue = '#5b8ff9';
 const lightOrange = '#5ad8a6';
@@ -12,28 +14,29 @@ export interface PieNodeInterface extends ModelConfig {
 }
 export interface PieNode2Interface extends ModelConfig {
   degrees?: number[];
-  sumDegree?: number;
+  colors?: string[];
 }
 const customNodes: [string, ShapeOptions][] = [
-  ['pie2-node', {
+  ['pie-node', {
     draw: (cfg?: PieNode2Interface, group?: IGroup) => {
       if (!cfg || !group) throw new Error('no pie node config / group');
-      const { size = PIE_SIZE, degrees, sumDegree } = cfg;
+      const { size = PIE_SIZE, degrees, colors } = cfg;
       if (!(typeof size === 'number')) throw new Error('size must be a number');
-      if (!degrees || !sumDegree) throw new Error('degree / sumDegree undefined');
+      if (!degrees) throw new Error('degrees undefined');
+      if (!colors) throw new Error('colors undefined');
+      const sum = degrees.reduce((a, b) => a + b, 0);
       const radius = size / 2;
       let curAngle = 0;
       let prevPoint = [radius, 0];
-      let shape: IShape;
-      degrees.forEach((d) => {
-        const nowPer = d / sumDegree;
+      const shapes: IShape[] = [];
+      degrees.forEach((d, index) => {
+        const nowPer = d / sum;
         const nowAngle = nowPer * Math.PI * 2;
         curAngle += nowAngle;
         const nowPoint = [
           radius * Math.cos(curAngle),
           -radius * Math.sin(curAngle),
         ];
-        // TODO
         const isBigArc = nowAngle > Math.PI ? 1 : 0;
         const s = group.addShape('path', {
           attrs: {
@@ -44,68 +47,13 @@ const customNodes: [string, ShapeOptions][] = [
               ['Z'],
             ],
             lineWidth: 0,
-            fill: lightOrange,
+            fill: colors[index % colors.length],
           },
         });
+        shapes.push(s);
         prevPoint = nowPoint;
-        if (!shape) {
-          shape = s;
-        }
       });
-      return shape;
-    },
-  }],
-  ['pie-node', {
-    draw: (cfg: PieNodeInterface | undefined, group: IGroup | undefined) => {
-      if (!cfg || !group) throw new Error('no pie node config / group');
-      const { size: cfgSize = PIE_SIZE, inDegree = 0, degree = 360 } = cfg;
-      const size: number[] = typeof cfgSize === 'number' ? [cfgSize, cfgSize] : cfgSize;
-
-      const radius = size[0] / 2; // node radius
-      const inPercentage = inDegree / degree; // the ratio of indegree to outdegree
-      const inAngle = inPercentage * Math.PI * 2; // the anble for the indegree fan
-      const inArcEnd = [
-        radius * Math.cos(inAngle),
-        -radius * Math.sin(inAngle),
-      ]; // the end position for the in -degree fan
-      let isInBigArc = 0;
-      let isOutBigArc = 1;
-      if (inAngle > Math.PI) {
-        isInBigArc = 1;
-        isOutBigArc = 0;
-      }
-      // fan shape for the in degree
-      const fanIn = group.addShape('path', {
-        attrs: {
-          path: [
-            ['M', radius, 0],
-            ['A', radius, radius, 0, isInBigArc, 0, inArcEnd[0], inArcEnd[1]],
-            ['L', 0, 0],
-            ['Z'],
-          ],
-          lineWidth: 0,
-          fill: lightOrange,
-          draggable: true,
-        },
-        name: 'in-fan-shape',
-      });
-      // draw the fan shape
-      group.addShape('path', {
-        attrs: {
-          path: [
-            ['M', inArcEnd[0], inArcEnd[1]],
-            ['A', radius, radius, 0, isOutBigArc, 0, radius, 0],
-            ['L', 0, 0],
-            ['Z'],
-          ],
-          lineWidth: 0,
-          fill: lightBlue,
-          draggable: true,
-        },
-        name: 'out-fan-shape',
-      });
-      // 返回 keyshape
-      return fanIn;
+      return shapes[0];
     },
   }],
 ];

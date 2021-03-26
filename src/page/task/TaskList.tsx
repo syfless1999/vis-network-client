@@ -11,9 +11,8 @@ const { Column } = Table;
 function DataSourceList(props: { list: Array<Task> }) {
   const { list } = props;
   const history = useHistory();
-  const handleTaskResultView = (label: string, taskId: string) => {
-    if (!label) return;
-    history.push(`/network/${label}/${taskId}`);
+  const handleTaskResultView = (taskId: string) => {
+    history.push(`/network/${taskId}`);
   };
   return (
     <Table rowKey="_id" dataSource={list}>
@@ -46,7 +45,7 @@ function DataSourceList(props: { list: Array<Task> }) {
         title="result"
         dataIndex="_id"
         key="result"
-        render={(_id, record: Task) => <Button type="primary" onClick={() => handleTaskResultView(record.dataSourceName || '', _id)}>view</Button>}
+        render={(_id) => <Button type="primary" onClick={() => handleTaskResultView(_id)}>view</Button>}
       />
     </Table>
   );
