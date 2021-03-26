@@ -2,6 +2,8 @@ import Graphin from '@antv/graphin';
 import {
   ShapeOptions, IGroup, ModelConfig, IShape,
 } from '@antv/g6';
+import { getRandomValue } from '../array';
+import { colorSets } from '../color/graphColor';
 
 const lightBlue = '#5b8ff9';
 const lightOrange = '#5ad8a6';
@@ -20,15 +22,15 @@ const customNodes: [string, ShapeOptions][] = [
   ['pie-node', {
     draw: (cfg?: PieNode2Interface, group?: IGroup) => {
       if (!cfg || !group) throw new Error('no pie node config / group');
-      const { size = PIE_SIZE, degrees, colors } = cfg;
+      const {
+        size = PIE_SIZE, degrees, colors, style,
+      } = cfg;
       if (!(typeof size === 'number')) throw new Error('size must be a number');
-      if (!degrees) throw new Error('degrees undefined');
-      if (!colors) throw new Error('colors undefined');
+      if (!degrees || !colors || !style) throw new Error('sth undefined');
       const sum = degrees.reduce((a, b) => a + b, 0);
       const radius = size / 2;
       let curAngle = 0;
       let prevPoint = [radius, 0];
-      const shapes: IShape[] = [];
       degrees.forEach((d, index) => {
         const nowPer = d / sum;
         const nowAngle = nowPer * Math.PI * 2;
@@ -38,7 +40,7 @@ const customNodes: [string, ShapeOptions][] = [
           -radius * Math.sin(curAngle),
         ];
         const isBigArc = nowAngle > Math.PI ? 1 : 0;
-        const s = group.addShape('path', {
+        group.addShape('path', {
           attrs: {
             path: [
               ['M', prevPoint[0], prevPoint[1]],
@@ -50,10 +52,31 @@ const customNodes: [string, ShapeOptions][] = [
             fill: colors[index % colors.length],
           },
         });
-        shapes.push(s);
         prevPoint = nowPoint;
       });
-      return shapes[0];
+      const shape = group.addShape('circle', {
+        attrs: {
+          x: 0,
+          y: 0,
+          r: size / 4,
+          fill: style.fill || '#000',
+        },
+      });
+      if (cfg.label) {
+        const fontSize = size / 4;
+        group.addShape('text', {
+          attrs: {
+            x: 0,
+            y: 0,
+            textAlign: 'center',
+            textBaseline: 'middle',
+            text: cfg.label,
+            fill: '#fff',
+            fontSize,
+          },
+        });
+      }
+      return shape;
     },
   }],
 ];

@@ -49,7 +49,7 @@ export const normalNodeStyleWrapper = (n: network.Node, color?: string) => {
   };
   return sn;
 };
-export const oldClusterStyleWrapper = (c: network.Cluster, color?: string) => {
+export const defaultClusterStyleWrapper = (c: network.Cluster, color?: string) => {
   const clusterColor = color || getNodeColor(c);
   const m = getMultiple(c);
   const clusterSize = m * NODE_SIZE;
@@ -80,13 +80,14 @@ export const featureClusterStyleWrapper = (
   color?: string,
 ) => {
   const { features: featStr } = c;
-  if (!featStr) return oldClusterStyleWrapper(c, color);
+  if (!featStr) return defaultClusterStyleWrapper(c, color);
   const features = strings2Features(featStr);
   const feature = features[featName];
-  if (!feature) return oldClusterStyleWrapper(c, color);
+  if (!feature) return defaultClusterStyleWrapper(c, color);
 
   const m = getMultiple(c);
   const clusterSize = m * NODE_SIZE;
+  const count = count2String(c.count);
   const degrees: number[] = Object.values(feature);
   const colors = getRandomValue(colorSets, degrees.length).map((c) => c.mainFill);
   const sc = {
@@ -95,6 +96,7 @@ export const featureClusterStyleWrapper = (
     size: clusterSize,
     degrees,
     colors,
+    label: count,
   };
   return sc;
 };
@@ -105,7 +107,7 @@ export const nodeStyleWrapper = (
 ) => {
   if (isCluster(n)) {
     if (feature === FEATURE_ALL) {
-      return oldClusterStyleWrapper(n, color);
+      return defaultClusterStyleWrapper(n, color);
     }
     return featureClusterStyleWrapper(n, feature, color);
   }

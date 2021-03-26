@@ -39,7 +39,7 @@ register();
 
 const Network = () => {
   const [state, setState] = useState<NetworkState>({
-    layout: 'circle',
+    layout: 'grid',
     level: -1,
     displayData: { nodes: [], edges: [] },
     feature: FEATURE_ALL,
