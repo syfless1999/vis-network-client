@@ -10,12 +10,12 @@ import SearchBar from 'src/page/component/SearchBar';
 import LevelSelector from 'src/page/component/GraphPanel/LevelSelector';
 import FeatureSelector from 'src/page/component/GraphPanel/FeatureSelector';
 import { completeNetworkData, getLayerNetworkData, getAroundNetwork } from 'src/service/network';
+import { getOneTask } from 'src/service/task';
 import * as network from 'src/type/network';
+import Task from 'src/model/task';
 import { mergeTwoLayerNetwork } from 'src/util/network';
 import { networkStyleWrapper } from 'src/util/network/styleWrapper';
 import register from 'src/util/g6Node/register';
-import { getOneTask } from 'src/service/task';
-import Task from 'src/model/task';
 
 interface NetworkParam {
   taskId: string;
@@ -30,7 +30,7 @@ interface NetworkState {
 }
 
 const {
-  ZoomCanvas, FitView, ActivateRelations,
+  ZoomCanvas, FitView,
 } = Behaviors;
 export const FEATURE_ALL = 'all';
 
@@ -51,11 +51,14 @@ const Network = () => {
   } = state;
   const maxLevel = sourceData.length - 1;
   const { taskId } = useParams<NetworkParam>();
-  let label: string;
+  const feats = [FEATURE_ALL];
+  let label: string | undefined;
   if (task) {
-    const { dataSource } = task;
-    label = dataSource[0].name;
+    const { dataSource: [ds] } = task;
+    label = ds.name;
+    feats.push(...ds.node.param);
   }
+  const layoutType = layouts.find((l) => l.type === layout);
 
   const handleChangeLayout = (value: string) => setState((prev) => ({
     ...prev,
@@ -65,12 +68,10 @@ const Network = () => {
     ...prev,
     feature: value,
   }));
-  const handleDisplayDataChange = React.useCallback((newDisplayData: network.Network) => {
-    setState((prev) => ({
-      ...prev,
-      displayData: newDisplayData,
-    }));
-  }, []);
+  const handleDisplayDataChange = (newDisplayData: network.Network) => setState((prev) => ({
+    ...prev,
+    displayData: newDisplayData,
+  }));
   const handleLevelChange = React.useCallback(async (value: number) => {
     if (value < 0 || value > maxLevel) return;
     let targetNetwork = sourceData[value];
@@ -106,8 +107,6 @@ const Network = () => {
     return newNetwork;
   };
 
-  // memo: layout type
-  const layoutType = useMemo(() => layouts.find((l) => l.type === layout), [layout]);
   // memo: styled network data
   const styledData = useMemo(() => {
     const { edges } = displayData;
@@ -148,8 +147,6 @@ const Network = () => {
         </ContextMenu>
         {/* 滚轮放大缩小：关闭 */}
         <ZoomCanvas disabled />
-        {/* 关联高亮 */}
-        <ActivateRelations />
         {/* 适应视图 */}
         <FitView />
         <Toolbar />
@@ -165,7 +162,7 @@ const Network = () => {
         {/* 属性选择 */}
         <FeatureSelector
           feature={feature}
-          features={task ? task.dataSource[0].node.param : []}
+          features={feats}
           onChange={handleFeatureChange}
         />
       </Graphin>

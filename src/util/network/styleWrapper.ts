@@ -6,12 +6,14 @@ import { hexToRgbaToHex } from 'src/util/color/hexToRgba';
 import { isCluster, isClusterEdge } from 'src/util/network';
 import { count2String, strings2Features } from 'src/util/string';
 import { getRandomValue } from 'src/util/array';
+import { PetalInfo } from 'src/util/g6Node/register';
 
 // constant
 const NODE_UNIT = 3;
 
 const NODE_SIZE = 26;
 const ICON_SIZE = 12;
+const PETAL_BASE_HEIGHT = 250;
 
 export const getMultiple = (c: network.Cluster) => {
   const { count } = c;
@@ -50,27 +52,42 @@ export const normalNodeStyleWrapper = (n: network.Node, color?: string) => {
   return sn;
 };
 export const defaultClusterStyleWrapper = (c: network.Cluster, color?: string) => {
-  const clusterColor = color || getNodeColor(c);
+  const { features: featStr } = c;
+  if (!featStr) return normalNodeStyleWrapper(c, color);
+  const features = strings2Features(featStr);
   const m = getMultiple(c);
   const clusterSize = m * NODE_SIZE;
-  const iconSize = m * ICON_SIZE;
   const count = count2String(c.count);
+  const petals: PetalInfo[] = [];
+  const featNames = Object.keys(features);
+  const colors = getRandomValue(colorSets, featNames.length);
+  featNames.forEach((name, i) => {
+    const feat = features[name];
+    let maxDesc = '';
+    let maxV = 0;
+    let sum = 0;
+    Object.keys(feat).forEach((desc) => {
+      const v = feat[desc];
+      sum += v;
+      if (maxV < v) {
+        maxV = v;
+        maxDesc = desc;
+      }
+    });
+    const maxPer = Math.floor((maxV / sum) * 100) / 100;
+    const text = `${name}:${maxDesc}-${maxPer}`;
+    petals.push({
+      height: maxPer * PETAL_BASE_HEIGHT,
+      text,
+      color: colors[i].mainFill,
+    });
+  });
   const sc = {
     ...c,
-    style: {
-      keyshape: {
-        fill: hexToRgbaToHex(clusterColor, 0.1),
-        stroke: clusterColor,
-        size: [clusterSize, clusterSize],
-      },
-      icon: {
-        fontFamily: 'graphin',
-        type: 'font',
-        value: count,
-        fill: clusterColor,
-        size: iconSize,
-      },
-    },
+    type: 'rose-node',
+    size: clusterSize,
+    label: count,
+    petals,
   };
   return sc;
 };
