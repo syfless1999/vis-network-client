@@ -169,7 +169,7 @@ const Network = () => {
   return (
     <div>
       <Graphin
-        style={{ padding: '36px 0' }}
+        style={{ paddingTop: 36 }}
         data={styledData}
         layout={layoutType}
       >
