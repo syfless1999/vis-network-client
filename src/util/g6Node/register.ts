@@ -34,6 +34,8 @@ const drawPetals = (group: IGroup, petals: Petal[]): void => {
         ],
         fill: color,
       },
+      name: 'rose-path',
+      draggable: true,
     });
   });
 };
@@ -48,9 +50,9 @@ export interface PetalInfo {
   color: string;
 }
 export interface RoseNodeInterface extends ModelConfig {
-  petals?: [];
+  petals?: PetalInfo[];
 }
-const customNodes: [string, ShapeOptions][] = [
+const customNodes: [string, ShapeOptions, string | undefined][] = [
   ['pie-node', {
     draw: (cfg?: PieNodeInterface, group?: IGroup) => {
       if (!cfg || !group) throw new Error('no pie node config / group');
@@ -74,6 +76,8 @@ const customNodes: [string, ShapeOptions][] = [
           r: size / 4,
           fill: style.fill || '#000',
         },
+        name: 'rose-circle',
+        draggable: true,
       });
       if (cfg.label) {
         const fontSize = size / 4;
@@ -87,21 +91,26 @@ const customNodes: [string, ShapeOptions][] = [
             fill: '#fff',
             fontSize,
           },
+          name: 'rose-text',
+          draggable: true,
         });
       }
       return shape;
     },
-  }],
+  }, 'single-node'],
   ['rose-node', {
     draw: (cfg?: RoseNodeInterface, group?: IGroup) => {
       if (!cfg || !group) throw new Error('no pie node config / group');
       const { petals, style, size } = cfg;
       if (!(typeof size === 'number')) throw new Error('size must be a number');
       if (!petals || !style) throw new Error('sth undefined');
+
+      const sum = petals.reduce((cur, p) => cur + p.height, 0);
       const pArr = petals.map((p) => {
         const { height, color } = p;
+        const r = (height / sum) * (size / 2) * petals.length;
         return {
-          r: height,
+          r,
           v: 1,
           color,
         };
@@ -114,6 +123,8 @@ const customNodes: [string, ShapeOptions][] = [
           r: size / 4,
           fill: style.fill || '#000',
         },
+        name: 'pie-circle',
+        draggable: true,
       });
       if (cfg.label) {
         const fontSize = size / 4;
@@ -127,11 +138,13 @@ const customNodes: [string, ShapeOptions][] = [
             fill: '#fff',
             fontSize,
           },
+          name: 'pie-text',
+          draggable: true,
         });
       }
       return shape;
     },
-  }],
+  }, 'single-node'],
 ];
 const g6Register = () => {
   customNodes.forEach((cNode) => {

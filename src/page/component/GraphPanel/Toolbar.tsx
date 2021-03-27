@@ -1,68 +1,45 @@
 import React, { useContext } from 'react';
-import { GraphinContext } from '@antv/graphin';
+import { GraphinContext, GraphinContextType } from '@antv/graphin';
+import { Toolbar } from '@antv/graphin-components';
+import { ToolBarItemType } from '@antv/graphin-components/lib/Toolbar';
 import {
   ZoomOutOutlined, ZoomInOutlined, DownloadOutlined,
 } from '@ant-design/icons';
-import { Button } from 'antd';
 
-interface ToolbarOption {
-  id: string,
-  icon: JSX.Element,
-  action: () => void,
+interface IToolBarItemType extends ToolBarItemType {
+  action?: () => void;
 }
 
-const Toolbar = () => {
+const Tool = () => {
   const { apis, graph } = useContext(GraphinContext);
   const { handleZoomIn, handleZoomOut } = apis;
-
-  const options: ToolbarOption[] = [
+  const handleClick = (context: GraphinContextType, option: IToolBarItemType) => {
+    const { action } = option;
+    if (action) {
+      action();
+    }
+  };
+  const options = [
     {
-      id: 'zoomIn',
-      icon: <ZoomInOutlined />,
-      action: () => {
-        handleZoomOut();
-      },
+      key: 'zoomOut',
+      name: <ZoomInOutlined />,
+      action: handleZoomOut,
     },
     {
-      id: 'zoomOut',
-      icon: <ZoomOutOutlined />,
-      action: () => {
-        handleZoomIn();
-      },
+      key: 'zoomIn',
+      name: <ZoomOutOutlined />,
+      action: handleZoomIn,
     },
     {
-      id: 'download',
-      icon: <DownloadOutlined />,
+      key: 'download',
+      name: <DownloadOutlined />,
       action: () => {
         graph.downloadFullImage('visual-network-pic');
       },
     },
-    // {
-    //   id: 'fisheye',
-    //   icon: <EyeOutlined />,
-    //   action: () => {
-    //     const fishEye = new G6.Fisheye({
-    //       d: 1.5,
-    //       r: 100,
-    //       showLabel: false,
-    //     });
-    //     const escListener = (e: KeyboardEvent) => {
-    //       if (e.code === 'Escape') {
-    //         graph.removePlugin(fishEye);
-    //         window.removeEventListener('keydown', escListener);
-    //       }
-    //     };
-    //     graph.addPlugin(fishEye);
-    //     window.addEventListener('keydown', escListener);
-    //   },
-    // },
   ];
   return (
-    <>
-      {options.map((item) => (
-        <Button type="text" key={item.id} onClick={item.action}>{item.icon}</Button>
-      ))}
-    </>
+    <Toolbar direction="vertical" options={options} onChange={handleClick} />
   );
 };
-export default Toolbar;
+export default Tool;

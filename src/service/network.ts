@@ -5,9 +5,14 @@ export interface GetLayerNetworkDataParam {
   taskId: string,
   level?: string,
 }
+export interface getLayerNetworkDataRes {
+  nodeNum: number;
+  edgeNum: number;
+  network: network.LayerNetwork;
+}
 export function getLayerNetworkData(param: GetLayerNetworkDataParam) {
   const url = `/network/layer?${new URLSearchParams(param as unknown as Record<string, string>).toString()}`;
-  return request<network.LayerNetwork>(url);
+  return request<getLayerNetworkDataRes>(url);
 }
 
 export interface CompleteNetworkDataParam {

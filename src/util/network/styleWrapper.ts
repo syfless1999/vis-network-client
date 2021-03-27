@@ -8,16 +8,13 @@ import { count2String, strings2Features } from 'src/util/string';
 import { getRandomValue } from 'src/util/array';
 import { PetalInfo } from 'src/util/g6Node/register';
 
-// constant
-const NODE_UNIT = 3;
-
 const NODE_SIZE = 26;
 const ICON_SIZE = 12;
 const PETAL_BASE_HEIGHT = 250;
 
 export const getMultiple = (c: network.Cluster) => {
-  const { count } = c;
-  return Math.min(Math.max(2, count / NODE_UNIT), 6);
+  const { level } = c;
+  return Math.min(level, 5) + 1;
 };
 export const getNodeColor = (c: network.Node, index?: number) => {
   const { id } = c;
