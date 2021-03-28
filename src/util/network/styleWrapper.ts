@@ -1,7 +1,7 @@
 import { Utils } from '@antv/graphin';
 import { FEATURE_ALL } from 'src/page/network/Network';
 import * as network from 'src/type/network';
-import { colorMap, colorSets } from 'src/util/color/graphColor';
+import { colorSets } from 'src/util/color/graphColor';
 import { hexToRgbaToHex } from 'src/util/color/hexToRgba';
 import { isCluster, isClusterEdge } from 'src/util/network';
 import { count2String, strings2Features } from 'src/util/string';
@@ -16,21 +16,9 @@ export const getMultiple = (c: network.Cluster) => {
   const { level } = c;
   return Math.min(level, 5) + 1;
 };
-export const getNodeColor = (c: network.Node, index?: number) => {
-  const { id } = c;
-  const color = colorMap.get(id);
-  if (color) {
-    return color;
-  }
-  const len = colorSets.length;
-  const ran = (index || Math.floor(Math.random() * len)) % len;
-  const ranColor = colorSets[ran].mainFill;
-  colorMap.set(id, ranColor);
-  return ranColor;
-};
-export const normalNodeStyleWrapper = (n: network.Node, color?: string) => {
+export const normalNodeStyleWrapper = (n: network.Node) => {
   const { id } = n;
-  const cColor = color || getNodeColor(n);
+  const cColor = getRandomValue(colorSets)[0];
   const sn = {
     ...n,
     style: {
@@ -48,16 +36,25 @@ export const normalNodeStyleWrapper = (n: network.Node, color?: string) => {
   };
   return sn;
 };
-export const defaultClusterStyleWrapper = (c: network.Cluster, color?: string) => {
+export const defaultClusterStyleWrapper = (
+  c: network.Cluster,
+  fcMap: Record<string, string[]>,
+) => {
   const { features: featStr } = c;
-  if (!featStr) return normalNodeStyleWrapper(c, color);
+  if (!featStr) return normalNodeStyleWrapper(c);
   const features = strings2Features(featStr);
   const m = getMultiple(c);
   const clusterSize = m * NODE_SIZE;
   const count = count2String(c.count);
   const petals: PetalInfo[] = [];
   const featNames = Object.keys(features);
-  const colors = getRandomValue(colorSets, featNames.length);
+  const colors: string[] = featNames.map((f) => {
+    const cs = fcMap[f];
+    if (!cs) {
+      return getRandomValue(colorSets)[0];
+    }
+    return cs[0];
+  });
   featNames.forEach((name, i) => {
     const feat = features[name];
     let maxDesc = '';
@@ -76,7 +73,7 @@ export const defaultClusterStyleWrapper = (c: network.Cluster, color?: string) =
     petals.push({
       height: maxPer * PETAL_BASE_HEIGHT,
       text,
-      color: colors[i].mainFill,
+      color: colors[i],
     });
   });
   const sc = {
@@ -91,19 +88,19 @@ export const defaultClusterStyleWrapper = (c: network.Cluster, color?: string) =
 export const featureClusterStyleWrapper = (
   c: network.Cluster,
   featName: string,
-  color?: string,
+  fcMap: Record<string, string[]>,
 ) => {
   const { features: featStr } = c;
-  if (!featStr) return defaultClusterStyleWrapper(c, color);
+  if (!featStr) return defaultClusterStyleWrapper(c, fcMap);
   const features = strings2Features(featStr);
   const feature = features[featName];
-  if (!feature) return defaultClusterStyleWrapper(c, color);
+  if (!feature) return defaultClusterStyleWrapper(c, fcMap);
 
   const m = getMultiple(c);
   const clusterSize = m * NODE_SIZE;
   const count = count2String(c.count);
   const degrees: number[] = Object.values(feature);
-  const colors = getRandomValue(colorSets, degrees.length).map((c) => c.mainFill);
+  const colors = fcMap[featName];
   const sc = {
     ...c,
     type: 'pie-node',
@@ -117,15 +114,15 @@ export const featureClusterStyleWrapper = (
 export const nodeStyleWrapper = (
   n: network.Node,
   feature: string,
-  color?: string,
+  fcMap: Record<string, string[]>,
 ) => {
   if (isCluster(n)) {
     if (feature === FEATURE_ALL) {
-      return defaultClusterStyleWrapper(n, color);
+      return defaultClusterStyleWrapper(n, fcMap);
     }
-    return featureClusterStyleWrapper(n, feature, color);
+    return featureClusterStyleWrapper(n, feature, fcMap);
   }
-  return normalNodeStyleWrapper(n, color);
+  return normalNodeStyleWrapper(n);
 };
 export const normalEdgeStyleWrapper = (e: network.Edge) => e;
 export const clusterEdgeStyleWrapper = (e: network.ClusterEdge) => e;
@@ -138,19 +135,14 @@ export const edgeStyleWrapper = (e: network.Edge) => {
 export const networkStyleWrapper = (
   c: network.Network,
   feature: string,
+  fcMap: Record<string, string[]>,
 ) => {
   const { nodes, edges } = c;
   const styledNodes: network.Node[] = [];
   const styledEdges: network.Edge[] = [];
 
-  nodes.forEach((node, index) => {
-    const color = getNodeColor(node, index);
-    styledNodes.push(nodeStyleWrapper(node, feature, color));
-  });
-
-  edges.forEach((edge) => {
-    styledEdges.push(edgeStyleWrapper(edge));
-  });
+  nodes.forEach((node) => styledNodes.push(nodeStyleWrapper(node, feature, fcMap)));
+  edges.forEach((edge) => styledEdges.push(edgeStyleWrapper(edge)));
 
   const multpleStyledEdges = Utils.processEdges(styledEdges, { poly: 50, loop: 10 });
 

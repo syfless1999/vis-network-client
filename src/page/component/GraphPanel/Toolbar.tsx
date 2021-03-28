@@ -42,4 +42,4 @@ const Tool = () => {
     <Toolbar direction="vertical" options={options} onChange={handleClick} />
   );
 };
-export default Tool;
+export default React.memo(Tool);

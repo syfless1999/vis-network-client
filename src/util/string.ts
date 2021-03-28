@@ -35,3 +35,17 @@ export const strings2Features = (str: string): Features => {
   });
   return feats;
 };
+
+export const strings2FeatureArray = (str: string): [string, string][] => {
+  const arr: [string, string][] = [];
+  const descs = str.match(/\S+( \[\S+ \d+\])+/g);
+  if (!descs) return arr;
+  descs.forEach((desc) => {
+    const pns = desc.match(/^\w+/g);
+    if (!pns || !pns[0]) return;
+    const [propName] = pns;
+    const others = desc.slice(propName.length);
+    arr.push([propName, others]);
+  });
+  return arr;
+};

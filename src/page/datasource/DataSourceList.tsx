@@ -4,8 +4,8 @@ import {
 } from 'antd';
 import styled from 'styled-components';
 import DataSource, { EdgeProperty, NodeProperty } from 'src/model/datasource';
-import { getRandomColor } from 'src/util/color/dataSourceColor';
 import { numberSimplify } from 'src/util/number';
+import { colorSets } from 'src/util/color/graphColor';
 
 const { Column } = Table;
 const SBadge = styled(Badge)`
@@ -31,8 +31,8 @@ function DataSourceList(props: { dataSource: Array<DataSource> }) {
           <>
             <SBadge overflowCount={999} count={numberSimplify(nodeProperty.current)} />
             {nodeProperty.param && nodeProperty.param.map(
-              (p) => (
-                <Tag key={p} color={getRandomColor()}>{p}</Tag>
+              (p, i) => (
+                <Tag key={p} color={colorSets[i % colorSets.length]}>{p}</Tag>
               ),
             )}
           </>
@@ -46,8 +46,8 @@ function DataSourceList(props: { dataSource: Array<DataSource> }) {
           <>
             <SBadge overflowCount={999} count={numberSimplify(edgeProperty.current)} />
             {edgeProperty.param && edgeProperty.param.map(
-              (p) => (
-                <Tag key={p} color={getRandomColor()}>{p}</Tag>
+              (p, i) => (
+                <Tag key={p} color={colorSets[i % colorSets.length]}>{p}</Tag>
               ),
             )}
           </>

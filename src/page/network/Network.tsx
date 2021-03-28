@@ -1,8 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {
+  useEffect, useMemo, useState, useContext,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, Form } from 'antd';
 import { ContextMenu } from '@antv/graphin-components';
-import Graphin, { Behaviors, Utils } from '@antv/graphin';
+import Graphin, {
+  Behaviors, GraphinContext, IG6GraphEvent, Utils,
+} from '@antv/graphin';
 
 import AsyncNodeMenu, { CompleteNetworkFunc } from 'src/page/component/GraphPanel/AsyncNodeMenu';
 import Toolbar from 'src/page/component/GraphPanel/Toolbar';
@@ -11,14 +15,18 @@ import SearchBar from 'src/page/component/SearchBar';
 import LevelSelector from 'src/page/component/GraphPanel/LevelSelector';
 import FeatureSelector from 'src/page/component/GraphPanel/FeatureSelector';
 import StatisticPanel from 'src/page/component/GraphPanel/StatisticPanel';
+import NodeInfo from 'src/page/network/NodeInfo';
+
 import { completeNetworkData, getLayerNetworkData, getAroundNetwork } from 'src/service/network';
 import { getOneTask } from 'src/service/task';
 import * as network from 'src/type/network';
 import Task from 'src/model/task';
-import { mergeTwoLayerNetwork } from 'src/util/network';
+import { isNode, mergeTwoLayerNetwork } from 'src/util/network';
 import { networkStyleWrapper } from 'src/util/network/styleWrapper';
 import register from 'src/util/g6Node/register';
 import styled from 'styled-components';
+import { colorObject } from 'src/util/color/graphColor';
+import { INode } from '@antv/g6';
 
 interface NetworkParam {
   taskId: string;
@@ -32,6 +40,7 @@ interface NetworkState {
   sourceData: network.LayerNetwork;
   feature: string;
   task?: Task;
+  focusNode?: network.Node;
 }
 export const FEATURE_ALL = 'all';
 
@@ -43,7 +52,6 @@ const Selector = styled(Card)`
   top: 0;
   right: 10px;
   padding: 12px;
-  box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
 `;
 const ISearchBar = styled.div`
   margin: auto;
@@ -56,11 +64,7 @@ const ISearchBar = styled.div`
 const IStatisticContainer = styled.div`
   width: 360px;
   box-sizing: border-box;
-  position: absolute;
-  margin: auto;
-  bottom: 0;
-  right: 0;
-  left: 0;
+  margin: 0 auto;
 `;
 // register custom g6 source
 register();
@@ -77,18 +81,37 @@ const Network = () => {
     task: undefined,
   });
   const {
-    layout, level, displayData, sourceData, feature, task, nodeNum, edgeNum,
+    layout, level, displayData, sourceData, feature, task, nodeNum, edgeNum, focusNode,
   } = state;
   const maxLevel = sourceData.length - 1;
   const { taskId } = useParams<NetworkParam>();
-  const feats = [FEATURE_ALL];
   let label: string | undefined;
   if (task) {
     const { dataSource: [ds] } = task;
     label = ds.name;
-    feats.push(...ds.node.param);
   }
   const layoutType = layouts.find((l) => l.type === layout);
+
+  const SampleBehavior = () => {
+    const { graph } = useContext(GraphinContext);
+    useEffect(() => {
+      const handleClick = (evt: IG6GraphEvent) => {
+        const node = evt.item as INode;
+        const model = node.getModel();
+        if (isNode(model)) {
+          setState((prev) => ({
+            ...prev,
+            focusNode: model,
+          }));
+        }
+      };
+      graph.on('node:click', handleClick);
+      return () => {
+        graph.off('node:click', handleClick);
+      };
+    }, []);
+    return null;
+  };
 
   const handleChangeLayout = (value: string) => setState((prev) => ({
     ...prev,
@@ -139,11 +162,27 @@ const Network = () => {
     return newNetwork;
   };
 
+  // memo: feature name
+  const feats = useMemo(() => {
+    if (!task) return [];
+    const { dataSource: [ds] } = task;
+    return ds.node.param;
+  }, [task]);
+  // memo: color set
+  const featureColorMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    feats.forEach((f, i) => {
+      if (f === FEATURE_ALL) return;
+      const colors = Object.values(colorObject);
+      map[f] = Object.values(colors)[i % colors.length];
+    });
+    return map;
+  }, [feats.length]);
   // memo: styled network data
   const styledData = useMemo(() => {
     const { edges } = displayData;
     displayData.edges = Utils.processEdges(edges, { poly: 50, loop: 10 });
-    return networkStyleWrapper(displayData, feature);
+    return networkStyleWrapper(displayData, feature, featureColorMap);
   }, [displayData, feature]);
 
   useEffect(() => {
@@ -168,11 +207,14 @@ const Network = () => {
 
   return (
     <div>
+      <ISearchBar>
+        <SearchBar onSearch={handleSearchNodeAroundNetwork} />
+      </ISearchBar>
       <Graphin
-        style={{ paddingTop: 36 }}
         data={styledData}
         layout={layoutType}
       >
+        <SampleBehavior />
         {/* 右键菜单：展开、收起 */}
         <ContextMenu>
           <AsyncNodeMenu
@@ -185,9 +227,6 @@ const Network = () => {
         <ZoomCanvas disabled />
         {/* 适应视图 */}
         <FitView />
-        <ISearchBar>
-          <SearchBar onSearch={handleSearchNodeAroundNetwork} />
-        </ISearchBar>
         <Toolbar />
         <Selector>
           <Form layout="vertical">
@@ -207,22 +246,27 @@ const Network = () => {
               {/* 属性选择 */}
               <FeatureSelector
                 feature={feature}
-                features={feats}
+                features={feats.concat(FEATURE_ALL)}
                 onChange={handleFeatureChange}
               />
             </Form.Item>
           </Form>
         </Selector>
-        {/* 全局信息 */}
-        <IStatisticContainer>
-          <StatisticPanel
-            nodeNum={displayData.nodes.length}
-            nodeSum={nodeNum}
-            edgeNum={displayData.edges.length}
-            edgeSum={edgeNum}
-          />
-        </IStatisticContainer>
       </Graphin>
+      {/* 全局信息 */}
+      <IStatisticContainer>
+        <StatisticPanel
+          nodeNum={displayData.nodes.length}
+          nodeSum={nodeNum}
+          edgeNum={displayData.edges.length}
+          edgeSum={edgeNum}
+        />
+      </IStatisticContainer>
+      {
+        focusNode ? (
+          <NodeInfo node={focusNode} feats={feats} />
+        ) : null
+      }
     </div>
   );
 };
