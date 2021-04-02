@@ -6,12 +6,13 @@ import { Layout } from 'antd';
 import Header from 'src/page/layout/Header';
 import Footer from 'src/page/layout/Footer';
 
-import DataSource from 'src/page/datasource';
-import Task from 'src/page/task';
-import SingleNetwork from 'src/page/network/Network';
-
 import 'src/app.less';
 
+const DataSource = React.lazy(() => import('src/page/datasource'));
+const Task = React.lazy(() => import('src/page/task'));
+const SingleNetwork = React.lazy(() => import('src/page/network/Network'));
+
+const { Suspense } = React;
 const { Content } = Layout;
 
 const MyContent = styled(Content)`
@@ -28,10 +29,12 @@ const Container = styled.div`
 function App() {
   const Router = () => (
     <Switch>
-      <Route path="/datasource"><DataSource /></Route>
-      <Route path="/task"><Task /></Route>
-      <Route path="/network/:taskId"><SingleNetwork /></Route>
-      <Route path="/"><h1>home</h1></Route>
+      <Suspense fallback={<div>wait</div>}>
+        <Route path="/datasource"><DataSource /></Route>
+        <Route path="/task"><Task /></Route>
+        <Route path="/network/:taskId"><SingleNetwork /></Route>
+        <Route path="/"><h1>home</h1></Route>
+      </Suspense>
     </Switch>
   );
   return (
