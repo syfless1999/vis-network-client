@@ -74,13 +74,13 @@ const customNodes: [string, ShapeOptions, string | undefined][] = [
           x: 0,
           y: 0,
           r: size / 4,
-          fill: style.fill || '#000',
+          fill: style.fill || '#5b8ff9',
         },
         name: 'rose-circle',
         draggable: true,
       });
       if (cfg.label) {
-        const fontSize = size / 4;
+        const fontSize = size / 4.5;
         group.addShape('text', {
           attrs: {
             x: 0,
@@ -121,13 +121,13 @@ const customNodes: [string, ShapeOptions, string | undefined][] = [
           x: 0,
           y: 0,
           r: size / 4,
-          fill: style.fill || '#000',
+          fill: style.fill || '#5b8ff9',
         },
         name: 'pie-circle',
         draggable: true,
       });
       if (cfg.label) {
-        const fontSize = size / 4;
+        const fontSize = size / 4.5;
         group.addShape('text', {
           attrs: {
             x: 0,

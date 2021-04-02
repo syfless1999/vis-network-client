@@ -71,7 +71,7 @@ register();
 
 const Network = () => {
   const [state, setState] = useState<NetworkState>({
-    layout: 'grid',
+    layout: 'graphin-force',
     level: -1,
     nodeNum: 0,
     edgeNum: 0,
@@ -207,13 +207,15 @@ const Network = () => {
 
   return (
     <div>
-      <ISearchBar>
-        <SearchBar onSearch={handleSearchNodeAroundNetwork} />
-      </ISearchBar>
       <Graphin
         data={styledData}
         layout={layoutType}
+        style={{ paddingTop: 36 }}
       >
+        <ISearchBar>
+          <SearchBar onSearch={handleSearchNodeAroundNetwork} />
+        </ISearchBar>
+        {/* 点击详细展开 */}
         <SampleBehavior />
         {/* 右键菜单：展开、收起 */}
         <ContextMenu>

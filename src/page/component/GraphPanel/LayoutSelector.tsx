@@ -1,14 +1,37 @@
 import React from 'react';
 import { Select } from 'antd';
+import { Edge } from 'src/type/network';
 
 const SelectOption = Select.Option;
 
 export const layouts = [
-  { type: 'graphin-force' },
-  { type: 'random' },
-  { type: 'grid' },
-  { type: 'circular' },
-  { type: 'radial' },
+  {
+    type: 'graphin-force',
+    preset: {
+      type: 'concentric',
+    },
+    animation: true,
+    defSpringLen: (
+      _edge: Edge,
+      source: { data: { layout: { degree: number; }; }; },
+      target: { data: { layout: { degree: number; }; }; },
+    ) => {
+      const nodeSize = 30;
+      const Sdegree = source.data.layout.degree;
+      const Tdegree = target.data.layout.degree;
+      const minDegree = Math.min(Sdegree, Tdegree);
+      return minDegree < 3 ? nodeSize * 5 : (minDegree + 2) * nodeSize;
+    },
+  },
+  {
+    type: 'grid',
+  },
+  {
+    type: 'circular',
+  },
+  {
+    type: 'radial',
+  },
 ];
 
 interface LayoutSelectorProps {

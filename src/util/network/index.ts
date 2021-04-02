@@ -32,7 +32,7 @@ export const getChildNodes = (
   return childNodes;
 };
 /**
- * 获得某个节点向上和向下查找的
+ * 获得某个节点向上查找的所有父节点
  * @param c 需要分析的中心节点
  * @param dataMap 范围内节点的Map
  */
