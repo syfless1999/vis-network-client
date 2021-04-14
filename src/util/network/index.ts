@@ -2,6 +2,7 @@ import {
   Cluster, ClusterEdge, Edge, EdgeMap, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
 import { getJoinString } from 'src/util/string';
+import { array2Map } from '../array';
 
 export const isNode = (c: unknown): c is Node => typeof c === 'object' && c != null && 'id' in c;
 export const isCluster = (c: unknown): c is Cluster => isNode(c) && 'nodes' in c;
@@ -84,11 +85,11 @@ export const getTargetNode = (
  */
 export const fillDisplayEdges = (
   nowEdges: Edge[],
-  nowEdgesMap: EdgeMap,
   sourceEdges: Edge[],
   displayNodeMap: NodeMap,
   sourceNodeMap: NodeMap,
 ) => {
+  const nowEdgesMap = array2Map(nowEdges, (e) => getJoinString(e.source, e.target));
   const addEdge = (source: string, target: string, edge: Edge) => {
     const edgeId = getJoinString(source, target);
     if (nowEdgesMap.has(edgeId)) {

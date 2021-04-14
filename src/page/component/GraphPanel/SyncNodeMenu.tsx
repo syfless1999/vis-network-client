@@ -53,10 +53,8 @@ const CustomMenu = (props: SyncNodeMenuProps) => {
       const allEdges = sourceData.reduce(
         (prev: Edge[], cur) => (cur && cur.edges ? prev.concat(cur.edges) : prev), [],
       );
-      const displayEdgesMap = array2Map(displayEdges, (e) => getJoinString(e.source, e.target));
       fillDisplayEdges(
         displayEdges,
-        displayEdgesMap,
         allEdges,
         displayNodeMap,
         nodeMap,
@@ -101,10 +99,8 @@ const CustomMenu = (props: SyncNodeMenuProps) => {
       const allEdges = sourceData.reduce(
         (prev: Edge[], cur) => (cur && cur.edges ? prev.concat(cur.edges) : prev), [],
       );
-      const displayEdgesMap = array2Map(displayEdges, (e) => getJoinString(e.source, e.target));
       fillDisplayEdges(
         displayEdges,
-        displayEdgesMap,
         allEdges,
         displayNodeMap,
         nodeMap,
