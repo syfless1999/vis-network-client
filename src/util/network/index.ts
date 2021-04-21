@@ -1,5 +1,5 @@
 import {
-  Cluster, ClusterEdge, Edge, EdgeMap, LayerNetwork, Node, NodeMap,
+  Cluster, ClusterEdge, Edge, LayerNetwork, Node, NodeMap,
 } from 'src/type/network';
 import { getJoinString } from 'src/util/string';
 import { array2Map } from '../array';
