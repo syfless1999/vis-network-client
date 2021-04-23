@@ -5,6 +5,7 @@ import { Layout } from 'antd';
 
 import Header from 'src/page/layout/Header';
 import Footer from 'src/page/layout/Footer';
+import Home from 'src/page/home';
 
 import 'src/app.less';
 
@@ -30,10 +31,10 @@ function App() {
   const Router = () => (
     <Switch>
       <Suspense fallback={<div>wait</div>}>
+        <Route path="/" exact><Home /></Route>
         <Route path="/datasource"><DataSource /></Route>
         <Route path="/task"><Task /></Route>
         <Route path="/network/:taskId"><SingleNetwork /></Route>
-        <Route path="/"><h1>home</h1></Route>
       </Suspense>
     </Switch>
   );
